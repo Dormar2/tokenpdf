@@ -7,6 +7,9 @@ paper_size = "A4"
 orientation = "portrait"
 margin = 10
 
+# Layout settings
+rotation = true
+
 # Tokens configuration
 [[tokens]]
 type = "circle"

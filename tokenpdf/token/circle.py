@@ -71,7 +71,7 @@ def new_dims(radius, dims, keep_aspect_ratio):
         return d, d
     aspect_ratio = dims[0] / dims[1]
     if aspect_ratio > 1:
-        return d * aspect_ratio, d
-    else:
         return d, d / aspect_ratio
+    else:
+        return d * aspect_ratio, d
    
