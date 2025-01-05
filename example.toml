@@ -6,7 +6,7 @@ system = "D&D 5e"
 # Paper settings
 paper_size = "A4"
 orientation = "portrait"
-margin = 10
+margin = 0.1
 
 # Layout settings
 rotation = true

@@ -1,4 +1,5 @@
 import papersize
+import numpy as np
 from .resources import ResourceLoader
 from .token import make_token
 from .canvas import make_canvas
@@ -25,13 +26,15 @@ def place_tokens(tokens, layout, canvas, config, resources, loader):
     print = vprint(verbose)
     sizes = [token.area(token_cfg, loader) for token, token_cfg in tqdm(tokens)]
     print("Arranging tokens in pages")
-    pages = layout.arrange(sizes, _gen(_page_size(config)), verbose=verbose)
-    canvas_pages = _make_pages(canvas, pages, config)
+    page_size_margin, page_size, margin = _page_size(config)
+    pages = layout.arrange(sizes, _gen(page_size_margin), verbose=verbose)
+    canvas_pages = _make_pages(canvas, pages, page_size)
     for placement_page, canvas_page in zip(tqdm(pages, desc="Drawing pages"),
                                             canvas_pages):
         for tindex, x, y, width, height in tqdm(placement_page, desc="Drawing tokens", leave=False):
+            xm, ym = (x + margin[0], y + margin[1])
             token, t_cfg = tokens[tindex]
-            token.draw(canvas_page, t_cfg, loader, (x, y, width, height))
+            token.draw(canvas_page, t_cfg, loader, (xm, ym, width, height))
 
 def run(*config_paths, output_file=None, verbose=None):
     tokens, layout, canvas, config, resources, loader = make(*config_paths, output_file=output_file, verbose=verbose)
@@ -62,15 +65,20 @@ def _make_canvas(config, resources):
     return make_canvas(config)
 
 
-def _make_pages(canvas, pages, config):
-    page_size = _page_size(config)
+def _make_pages(canvas, pages, page_size):
     # For now, all pages are the same size
     return [canvas.create_page(page_size) for _ in pages]
 
 def _page_size(config):
     page_type = config.get('page_size', 'A4')
-    page_size = papersize.parse_papersize(page_type, "mm")
-    return [float(x) for x in page_size]
+    page_size = np.array([float(m) for m in papersize.parse_papersize(page_type, "mm")])
+    page_size_margin = page_size
+    margin = [0, 0]
+    margin_ratio = config.get("page_margin", config.get("margin", 0))
+    margin = np.array(page_size) * margin_ratio
+    page_size_margin = np.array(page_size) - 2 * margin
+
+    return page_size_margin, page_size, margin
 
 def _load(*config_paths):
     rl = ResourceLoader()
