@@ -91,6 +91,6 @@ class TokenRegistry:
         merged_config = merge_configs(default_config, config)
         token = cls()
         config = token.apply_defaults(merged_config, resources)
-        return token, config, resources
+        return token, config
 
 Token.TOKEN_REGISTRY = TokenRegistry()

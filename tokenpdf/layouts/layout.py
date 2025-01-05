@@ -139,6 +139,8 @@ class BestLayout(Layout):
         :return: A list of pages, where each page is a list of tuples containing the token index
             and the placement rectangle (x, y, width, height)
         """
+        if not token_sizes:
+            return []
         page_sizes = ResettableGenerator(page_sizes)
         best_result = None
         best_layout = None

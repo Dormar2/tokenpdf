@@ -1,4 +1,5 @@
 import json
+from cachetools import cached
 import yaml
 import toml
 from pathlib import Path
@@ -6,9 +7,11 @@ from typing import Dict, Any, List
 import tempfile
 import requests
 import mimetypes
+import numpy as np
 from tokenpdf.utils.config import merge_configs
 from tokenpdf.utils.verbose import vprint, vtqdm
-import pypdl
+from tokenpdf.systems import registry as system_registry
+import tokenpdf.utils.config as config
 
 class ResourceLoader:
     """
@@ -17,6 +20,9 @@ class ResourceLoader:
 
     def __init__(self):
         self._local_files = []
+        self._cfg = None
+        self._resources = {}
+        self._systems = system_registry
 
     def load_config(self, file_path: str) -> Dict[str, Any]:
         """
@@ -24,22 +30,12 @@ class ResourceLoader:
 
         :param file_path: The path to the configuration file.
         :return: A dictionary representing the configuration.
-        :raises ValueError: If the file format is unsupported.
+        :raises ValueError: If the file format is unsupported
+        :raises FileNotFoundError: If the file does not exist
         """
-        path = Path(file_path)
-        if not path.is_file():
-            raise FileNotFoundError(f"Configuration file not found: {file_path}")
-
-        ext = path.suffix.lower()
-        with open(file_path, "r", encoding="utf-8") as f:
-            if ext == ".json":
-                return json.load(f)
-            elif ext in {".yaml", ".yml"}:
-                return yaml.safe_load(f)
-            elif ext == ".toml":
-                return toml.load(f)
-            else:
-                raise ValueError(f"Unsupported configuration file format: {ext}")
+        c = config.load_with_imports(file_path)
+        self._cfg = c
+        return c
 
     def load_configs(self, file_paths: List[str]) -> Dict[str, Any]:
         """
@@ -52,10 +48,62 @@ class ResourceLoader:
         for file_path in file_paths:
             single_config = self.load_config(file_path)
             unified_config = merge_configs(unified_config, single_config)
-        
+        self._cfg = unified_config
         return unified_config
+    
+    def generate_tokens(self, config: Dict[str, Any] = None, verbose=None) -> Dict[str, Any]:
+        """
+        Generates token specifications based on the configuration.
+        :param config: The configuration dictionary.
+        :return: A dictionary of generated tokens.
+        """
+        config = config if config is not None else self._cfg
+        if config is None:
+            return []
+        if verbose == None:
+            verbose = config.get("verbose", False)
+        system = self._systems.get_system(config.get("system", "D&D 5e"))
+        print = vprint(verbose)
+        print("Generating token specifications")
+        tokens = []
+        monsters = config.get("monsters", {})
+        for mid, monster in monsters.items():
+            for token in monster.get("tokens", []):
+                count = token.get("count", 1)
+                res = monster.copy()
+                res.update(token)
+                res["monster"] = mid
+                tokens.extend(make_n(res, count))
+        for token in config.get("tokens", []):
+            res = {}
+            if "monster" in token:
+                if token["monster"] not in monsters:
+                    raise ValueError(f"Monster {token['monster']} not found")
+                res.update(monsters.get(token["monster"], {}))
+            res.update(token)
+            count = res.get("count", 1)
+            tokens.extend(make_n(res, count))
+        
+        
+        for token in tokens:
+            if "size" not in token:
+                continue
+            size = system.token_size(token["size"])
+            if isinstance(size, float) or isinstance(size, int):
+                size = [size, size]
+            size = np.array(size)
+            token["width"] = size[0]
+            token["height"] = size[1]
+            token["radius"] = (size[0] + size[1]) / 4
+        
+        print(f"Generated {len(tokens)} tokens")
 
-    def load_resources(self, config:Dict[str,Any], verbose=None) -> Dict[str, Any]:
+
+        return tokens
+
+            
+
+    def load_resources(self, config:Dict[str,Any] = None, verbose=None) -> Dict[str, Any]:
         """
         Load resources specified in the configuration.
         :param config: The configuration dictionary.
@@ -63,25 +111,31 @@ class ResourceLoader:
                 Structure is similar to configuration,
                 except that paths are replaced with loaded resources.
         """
+        config = config if config is not None else self._cfg
+        if config is None:
+            return {}
         if verbose == None:
             verbose = config.get("verbose", False)
-        resources = {}
+        resources = {} if self._resources is None else self._resources
         for key, value in config.items():
             if isinstance(value, dict):
                 inner = self.load_resources(value, verbose)
                 if inner is not None:
-                    resources[key] = inner
+                    resources.update(inner)
             if isinstance(value, list) or isinstance(value, tuple):
-                reslist = []
                 for item in value:
                     inner = self.load_resources(item, verbose)
-                    reslist.append(inner if inner is not None else {})
-                if any(reslist):
-                    resources[key] = reslist
+                    if inner is not None:
+                        resources.update(inner)
             elif key == 'url' or key.endswith('_url'):
-                resources[key] = self.load_resource(value, verbose)
+                if value not in resources:
+                    resources[value] = self.load_resource(value, verbose)
+        self._resources = resources
         return resources
-
+    
+    def __getitem__(self, key):
+        return self._resources[key]
+    
     def load_resource(self, url: str, verbose=False) -> str:
         """
         Saves a local copy of the resource and returns the path.
@@ -135,3 +189,5 @@ def _download(url: str, file_path: str, allow_rename: bool = True) -> Path:
 
 
 
+def make_n(d, n):
+    return [d.copy() for _ in range(n)]

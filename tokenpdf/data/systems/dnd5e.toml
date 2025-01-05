@@ -1,0 +1,36 @@
+name = "D&D 5e"
+
+[token_sizes]
+    # The size of the token in feet (world units)
+    Fine = 0.5
+    Diminutive = 1
+    Tiny = 2.5
+    Small = 4
+    Medium = 5
+    Large = 10
+    Huge = 15
+    Gargantuan = 20
+    Colossal = 30
+    # From: https://dungeons.fandom.com/wiki/SRD:Table_of_Creature_Size_and_Scale
+    ColossalPlus1 = 40
+    ColossalPlus2 = 50
+    ColossalPlus3 = 70
+    ColossalPlus4 =  90
+    ColossalPlus5 =  110
+    ColossalPlus6 =  150
+    ColossalPlus7 =  190
+    ColossalPlus8 =  230
+    ColossalPlus9 =  310
+    ColossalPlus10 = 390
+    ColossalPlus11 = 470
+    ColossalPlus12 = 630
+    ColossalPlus13 = 790
+    ColossalPlus14 = 950
+    ColossalPlus15 = 1270
+    ColossalPlus16 = 1590
+
+
+[cell_size]
+    mm = 25.4 # Paper cell size in mm: 1x1 inch
+    world = 5 # World cell size in "system world" units: 5
+    unit = "ft" # "System world" units  

@@ -1,6 +1,7 @@
 # General configuration
 output = "tokens_output.pdf"
 verbose = true
+system = "D&D 5e"
 
 # Paper settings
 paper_size = "A4"
@@ -10,31 +11,25 @@ margin = 10
 # Layout settings
 rotation = true
 
-# Tokens configuration
-[[tokens]]
-type = "circle"
-radius = 30
-color = "blue"
-border_color = "black"
-border_width = 2
-
-[[tokens]]
-type = "circle"
-radius = 60
-color = "green"
-border_color = "yellow"
-border_width = 3
-
-[[tokens]]
-type = "circle"
+# Monster configurations
+[monsters.goblin]
+name = "Goblin"
+size = "Small"
+type = "Humanoid"
 image_url = "https://picsum.photos/200"
-width = 50
-height = 50
+thumbnail_url = "https://picsum.photos/50"
+tokens = [
+    { type = "circle", size = "medium", count = 33},
+    { type = "circle", count = 2},
+]
 
-[[tokens]]
-type = "circle"
-image_url = "https://picsum.photos/200/300"
-width = 100
-height = 100
-border_color = "red"
-border_width = 1
+[monsters.orc]
+name = "Orc"
+size = "Medium"
+type = "Humanoid"
+image_url = "https://picsum.photos/300"
+thumbnail_url = "https://picsum.photos/75"
+tokens = [
+    { type = "circle", size = "large", count = 1},
+    { type = "circle", size = "huge", count = 1},
+]

@@ -53,15 +53,17 @@ class CircleToken(Token):
         keep_aspect_ratio = config.get("keep_aspect_ratio", True)
         
         if config.get("image_url") is not None:
-            oim_width, oim_height = get_file_dimensions(resources["image_url"])
+            image_url_path = resources[config["image_url"]]
+            oim_width, oim_height = get_file_dimensions(image_url_path)
             im_width, im_height = new_dims(radius, (oim_width, oim_height), keep_aspect_ratio)
             mask = self._get_mask(config, (oim_width, oim_height))
-            canvas.image(x + width / 2 - im_width / 2, y + height / 2 - im_height / 2, im_width, im_height, resources["image_url"], mask)
+            canvas.image(x + width / 2 - im_width / 2, y + height / 2 - im_height / 2, im_width, im_height, image_url_path, mask)
         if config.get("border_url") is not None:
-            oim_width, oim_height = get_file_dimensions(resources["border_url"])
+            border_url_path = resources[config["border_url"]]
+            oim_width, oim_height = get_file_dimensions(border_url_path)
             im_width, im_height = new_dims(radius, (oim_width, oim_height), keep_aspect_ratio)
             mask = self._get_mask(config, (oim_width, oim_height))
-            canvas.image(x + width / 2 - im_width / 2, y + height / 2 - im_height / 2, im_width, im_height, resources["border_url"], mask)
+            canvas.image(x + width / 2 - im_width / 2, y + height / 2 - im_height / 2, im_width, im_height, border_url_path, mask)
         return rect
     
 

@@ -14,46 +14,44 @@ def make(*config_paths, output_file=None, verbose=None):
         config['output_file'] = output_file
     elif 'output_file' not in config:
         config['output_file'] = config.get('output', 'output.pdf')
-    tokens = _make_tokens(config, resources)
+    tokens = _make_tokens(config, loader)
     layout = _make_layout(config)
-    canvas = _make_canvas(config, resources)
+    canvas = _make_canvas(config, loader)
     return tokens, layout, canvas, config, resources, loader
 
-def place_tokens(tokens, layout, canvas, config, resources):
+def place_tokens(tokens, layout, canvas, config, resources, loader):
     verbose = config.get("verbose", False)
     tqdm = vtqdm(verbose)
     print = vprint(verbose)
-    sizes = [token.area(token_cfg,token_rsc) for token, token_cfg, token_rsc in tqdm(tokens)]
+    sizes = [token.area(token_cfg, loader) for token, token_cfg in tqdm(tokens)]
     print("Arranging tokens in pages")
     pages = layout.arrange(sizes, _gen(_page_size(config)), verbose=verbose)
     canvas_pages = _make_pages(canvas, pages, config)
     for placement_page, canvas_page in zip(tqdm(pages, desc="Drawing pages"),
                                             canvas_pages):
         for tindex, x, y, width, height in tqdm(placement_page, desc="Drawing tokens", leave=False):
-            token, t_cfg, t_rsc = tokens[tindex]
-            token.draw(canvas_page, t_cfg, t_rsc, (x, y, width, height))
+            token, t_cfg = tokens[tindex]
+            token.draw(canvas_page, t_cfg, loader, (x, y, width, height))
 
 def run(*config_paths, output_file=None, verbose=None):
     tokens, layout, canvas, config, resources, loader = make(*config_paths, output_file=output_file, verbose=verbose)
     
     print = vprint(config.get("verbose", False))
     print(f"Placing {len(tokens)} tokens")
-    place_tokens(tokens, layout, canvas, config, resources)
+    place_tokens(tokens, layout, canvas, config, resources, loader)
     print(f"Saving output to {output_file}")
     canvas.save()
     print("Done, cleaning up...")
     loader.cleanup()
 
-def _make_tokens(config, resources):
+def _make_tokens(config, loader):
     verbose = config.get("verbose", False)
     tqdm = vtqdm(verbose)
-    tokens_data = config.get("tokens", [])
-    resources_data = resources.get("tokens", [])
-    if not resources_data:
-        resources_data = [{}] * len(tokens_data)
-    return [make_token(token_config, token_rsc)
-                for token_config, token_rsc in 
-                    zip(tqdm(tokens_data, desc="Loading tokens"), resources_data)]
+    tokens_data = loader.generate_tokens(config)
+    
+    return [make_token(token_config, loader)
+                for token_config in 
+                    tqdm(tokens_data, desc="Loading tokens")]
 
 def _make_layout(config):
     vprint(config.get("verbose", False))("Making layout")
