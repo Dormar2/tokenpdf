@@ -25,25 +25,37 @@ def place_tokens(tokens, layout, canvas, config, resources, loader):
     tqdm = vtqdm(verbose)
     print = vprint(verbose)
     sizes = [token.area(token_cfg, loader) for token, token_cfg in tqdm(tokens)]
+    sizesm = [_token_size_with_margin(size, token_cfg) for size, (_, token_cfg) in zip(sizes, tokens)]
+    sizes_with_margins = [size for size, _ in sizesm]
+    token_margins = [margin for _, margin in sizesm]
+
     print("Arranging tokens in pages")
     page_size_margin, page_size, margin = _page_size(config)
-    pages = layout.arrange(sizes, _gen(page_size_margin), verbose=verbose)
+    pages = layout.arrange(sizes_with_margins, _gen(page_size_margin), verbose=verbose)
     canvas_pages = _make_pages(canvas, pages, page_size)
     for placement_page, canvas_page in zip(tqdm(pages, desc="Drawing pages"),
                                             canvas_pages):
         for tindex, x, y, width, height in tqdm(placement_page, desc="Drawing tokens", leave=False):
-            xm, ym = (x + margin[0], y + margin[1])
+            orig_size = sizes[tindex]
+            tmargins = token_margins[tindex]
+            if (width < height) != (orig_size[0] < orig_size[1]):
+                orig_size = orig_size[::-1]
+                tmargins = tmargins[::-1]
+
+            
+            
+            xm, ym = np.array([x, y]) + margin + tmargins
             token, t_cfg = tokens[tindex]
-            token.draw(canvas_page, t_cfg, loader, (xm, ym, width, height))
+            token.draw(canvas_page, t_cfg, loader, (xm, ym, *orig_size))
 
 def run(*config_paths, output_file=None, verbose=None):
     tokens, layout, canvas, config, resources, loader = make(*config_paths, output_file=output_file, verbose=verbose)
-    
-    print = vprint(config.get("verbose", False))
+    verbose = verbose if verbose is not None else config.get("verbose", False)
+    print = vprint(verbose)
     print(f"Placing {len(tokens)} tokens")
     place_tokens(tokens, layout, canvas, config, resources, loader)
     print(f"Saving output to {output_file}")
-    canvas.save()
+    canvas.save(verbose=verbose)
     print("Done, cleaning up...")
     loader.cleanup()
 
@@ -79,6 +91,10 @@ def _page_size(config):
     page_size_margin = np.array(page_size) - 2 * margin
 
     return page_size_margin, page_size, margin
+
+def _token_size_with_margin(size, token_cfg):
+    margin = token_cfg.get("margin", 0) * np.array(size)
+    return size + 2 * margin, margin
 
 def _load(*config_paths):
     rl = ResourceLoader()

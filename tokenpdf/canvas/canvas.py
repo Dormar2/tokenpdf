@@ -8,7 +8,8 @@ class CanvasPage(ABC):
     """
 
     @abstractmethod
-    def image(self, x: float, y: float, width: float, height: float, image_path: str):
+    def image(self, x: float, y: float, width: float, height: float, image_path: str, mask: Any = None,
+              flip: Tuple[bool, bool] = (False, False), rotate: float = 0):
         """
         Draws an image on the page.
         :param x: X-coordinate in mm.
@@ -16,6 +17,9 @@ class CanvasPage(ABC):
         :param width: Width of the image in mm.
         :param height: Height of the image in mm.
         :param image_path: Path to the image file.
+        :param mask: Optional mask for the image.
+        :param flip: Tuple of (horizontal, vertical) flip flags.
+        :param rotate: Rotation angle in radians.
         """
         pass
 
@@ -40,6 +44,32 @@ class CanvasPage(ABC):
         :param radius: Radius of the circle in mm.
         :param stroke: Whether to stroke the circle.
         :param fill: Whether to fill the circle.
+        """
+        pass
+
+    @abstractmethod
+    def line(self, x1: float, y1: float, x2: float, y2: float, color: Tuple[int, int, int] = (0, 0, 0),
+             thickness: float = 1, style: str = "solid"):
+        """
+        Draws a line on the page.
+        :param x1: X-coordinate of the starting point in mm.
+        :param y1: Y-coordinate of the starting point in mm.
+        :param x2: X-coordinate of the ending point in mm.
+        :param y2: Y-coordinate of the ending point in mm.
+        """
+        pass
+
+    @abstractmethod
+    def rect(self, x: float, y: float, width: float, height: float, stroke: int = 1, fill: int = 0,
+                color: Tuple[int, int, int] = (0, 0, 0), style: str = "solid"):
+        """
+        Draws a rectangle on the page.
+        :param x: X-coordinate of the top-left corner in mm.
+        :param y: Y-coordinate of the top-left corner in mm.
+        :param width: Width of the rectangle in mm.
+        :param height: Height of the rectangle in mm.
+        :param stroke: Whether to stroke the rectangle.
+        :param fill: Whether to fill the rectangle.
         """
         pass
 
@@ -69,7 +99,7 @@ class Canvas(ABC):
         pass
 
     @abstractmethod
-    def save(self):
+    def save(self, verbose: bool = False):
         """
         Finalizes and saves the canvas to the output file.
         """

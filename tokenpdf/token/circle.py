@@ -27,7 +27,7 @@ class CircleToken(Token):
         config = super().apply_defaults(config, resources)
         if config["image_url"] is not None:
             if config.get("radius") is None:
-                dims = get_file_dimensions(resources["image_url"])
+                dims = get_file_dimensions(resources[config["image_url"]])
                 config["radius"] = max(*dims) / (2*dpmm(config))
         else:
             if config.get("radius") is None:
@@ -47,6 +47,7 @@ class CircleToken(Token):
             return None
 
     def draw(self, canvas, config, resources, rect):
+        super().draw(canvas, config, resources, rect)
         radius = config["radius"]
         x, y, width, height = rect
         canvas.circle(x + width / 2, y + height / 2, radius, stroke=1, fill=1)

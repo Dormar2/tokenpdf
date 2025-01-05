@@ -40,14 +40,17 @@ class Token(ABC):
         """
         pass
 
-    @abstractmethod
     def draw(self, canvas, config, resources, rect):
         """
         Draws the token on the specified rectangle area.
         :param canvas: The drawing surface (PDF canvas, for example).
         :param rect: The rectangle (x, y, width, height) defining the area.
         """
-        pass
+        if config.get("rect_border_thickness") is not None:
+            canvas.rect(*rect, stroke=config.get("rect_border_thickness", None),
+                        fill=0, color=config.get("rect_border_color", None),
+                        style=config.get("rect_border_style", None))
+                        
 
 
     # Registry new subclasses

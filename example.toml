@@ -6,30 +6,54 @@ system = "D&D 5e"
 # Paper settings
 paper_size = "A4"
 orientation = "portrait"
-margin = 0.1
+margin = 0.05
 
 # Layout settings
 rotation = true
 
+# Global Token settings
+[token]
+#margin = 0.01
+rect_border_color = "black"
+#rect_border_thickness = 1
+standing_margin = 0.1
+
+
 # Monster configurations
-[monsters.goblin]
-name = "Goblin"
-size = "Small"
-type = "Humanoid"
-image_url = "https://picsum.photos/200"
-thumbnail_url = "https://picsum.photos/50"
-tokens = [
-    { type = "circle", size = "medium", count = 33},
-    { type = "circle", count = 2},
-]
+
 
 [monsters.orc]
 name = "Orc"
 size = "Medium"
 type = "Humanoid"
-image_url = "https://picsum.photos/300"
+image_url = "https://picsum.photos/200/500"
 thumbnail_url = "https://picsum.photos/75"
 tokens = [
-    { type = "circle", size = "large", count = 1},
-    { type = "circle", size = "huge", count = 1},
+    { type = "standing", size = "medium", count = 31, scale = 1.1, scale_rho = 0.1},
+]
+
+[monsters.goblin]
+name = "Goblin"
+size = "Small"
+type = "Humanoid"
+images_url = ["https://picsum.photos/200", "https://picsum.photos/300",
+                "https://picsum.photos/400", "https://picsum.photos/500"]
+
+                
+thumbnail_url = "https://picsum.photos/50"
+tokens = [
+    { type = "circle", size = "small", count = 12},
+    { type = "circle", size = "medium", count = 12},
+]
+
+
+[monsters.hobgoblin]
+name = "Hobgoblin"
+size = "Medium"
+type = "Humanoid"
+image_url = "https://picsum.photos/300/300"
+thumbnail_url = "https://picsum.photos/75"
+tokens = [
+    { type = "circle", size="small", count = 11, scale_rho = 0.3},
+    { type = "circle", count = 12},
 ]

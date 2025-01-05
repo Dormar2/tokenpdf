@@ -62,29 +62,33 @@ class ResourceLoader:
             return []
         if verbose == None:
             verbose = config.get("verbose", False)
+        seed = config.get("seed", None)
+        rng = np.random.RandomState(seed)
         system = self._systems.get_system(config.get("system", "D&D 5e"))
         print = vprint(verbose)
         print("Generating token specifications")
         tokens = []
+        gtoken = config.get("token", {}).copy()
         monsters = config.get("monsters", {})
         for mid, monster in monsters.items():
             for token in monster.get("tokens", []):
-                count = token.get("count", 1)
-                res = monster.copy()
-                res.update(token)
+                
+                res = merge_configs(gtoken, monster, token)
                 res["monster"] = mid
+                count = token.get("count", 1)
                 tokens.extend(make_n(res, count))
+
         for token in config.get("tokens", []):
-            res = {}
+            monster = {}
             if "monster" in token:
                 if token["monster"] not in monsters:
                     raise ValueError(f"Monster {token['monster']} not found")
-                res.update(monsters.get(token["monster"], {}))
-            res.update(token)
+                monster = monsters.get(token["monster"], {})
+            res = merge_configs(gtoken, monster, token)
             count = res.get("count", 1)
             tokens.extend(make_n(res, count))
         
-        
+        # Apply system-specific token sizes
         for token in tokens:
             if "size" not in token:
                 continue
@@ -95,7 +99,22 @@ class ResourceLoader:
             token["width"] = size[0]
             token["height"] = size[1]
             token["radius"] = (size[0] + size[1]) / 4
+
+        # Apply token-instance-specific scaling
+        for token in tokens:
+            scale = token.get("scale", 1)
+            scale_rho = token.get("scale_rho", 0)
+            if scale_rho != 0:
+                scale = random_ratio(scale, scale_rho, rng)
+            if scale != 1:
+                token["width"] *= scale
+                token["height"] *= scale
+                token["radius"] *= scale
         
+        # Apply random images
+        for token in tokens:
+            if "images_url" in token:
+                token["image_url"] = rng.choice(token["images_url"])
         print(f"Generated {len(tokens)} tokens")
 
 
@@ -123,10 +142,15 @@ class ResourceLoader:
                 if inner is not None:
                     resources.update(inner)
             if isinstance(value, list) or isinstance(value, tuple):
-                for item in value:
-                    inner = self.load_resources(item, verbose)
-                    if inner is not None:
-                        resources.update(inner)
+                if key == 'url' or key.endswith('_url'):
+                    for item in value:
+                        if item not in resources:
+                            resources[item] = self.load_resource(item, verbose)
+                else:
+                    for item in value:
+                        inner = self.load_resources(item, verbose)
+                        if inner is not None:
+                            resources.update(inner)
             elif key == 'url' or key.endswith('_url'):
                 if value not in resources:
                     resources[value] = self.load_resource(value, verbose)
@@ -186,6 +210,17 @@ def _download(url: str, file_path: str, allow_rename: bool = True) -> Path:
             
 
 
+
+
+def random_ratio(mu, sigma, rng):
+    """
+    Generates a random ratio, log-normally distributed around a mean.
+    :param mu: The mean of the distribution.
+    :param sigma: The standard deviation of the distribution.
+    :param rng: The random number generator.
+    :return: A random ratio.
+    """
+    return rng.lognormal(np.log(mu), sigma)
 
 
 

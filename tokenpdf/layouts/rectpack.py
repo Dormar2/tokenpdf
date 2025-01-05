@@ -1,7 +1,7 @@
 from typing import Any, Dict, Generator, List, Tuple
 from itertools import product
 import rectpack
-from .layout import KnownPagesLayout, BestLayout
+from .layout import KnownPagesLayout, BestLayout, LayoutImpossibleError
 import math
 from collections import defaultdict
 
@@ -83,6 +83,9 @@ class RectPackLayout(KnownPagesLayout):
         packer.pack()
         # Get the placement rectangles
         placement = packer.rect_list()
+        # Make sure we placed all tokens
+        if len(placement) != len(token_sizes):
+            raise LayoutImpossibleError("Not all tokens could be placed.")
         # Convert the placement rectangles to the format expected by the caller
         pages = defaultdict(list)
         for bid, x, y, width, height, rid in placement:

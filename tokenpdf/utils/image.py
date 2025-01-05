@@ -12,6 +12,30 @@ def get_file_dimensions(file_path: str) -> Tuple[float, float]:
     with Image.open(file_path) as image:
         return image.size
 
+def complete_size(width, height, image_width, image_height, keep_aspect_ratio:bool=False) -> Tuple[float, float]:
+    """
+    Complete the size of an object based on the image dimensions.
+    :param width: The width of the object. (None or -1 to indicate auto)
+    :param height: The height of the object. (None or -1 to indicate auto)
+    :param image_width: The width of the image.
+    :param image_height: The height of the image.
+    :param keep_aspect_ratio: If True, keep the aspect ratio of the image.
+    """
+    no_width = width is None or width < 0
+    no_height = height is None or height < 0
+    if no_width and no_height:
+        return image_width, image_height
+    
+    aspect_ratio = image_width / image_height
+    if keep_aspect_ratio and not (no_width or no_height):
+        if width / height > aspect_ratio:
+            return width, width / aspect_ratio
+        return height * aspect_ratio, height
+
+    if no_width:
+        return aspect_ratio * height, height
+    return width, width / aspect_ratio
+    
 
 def dpmm(config: dict, default:float = 300/25.4) -> float:
     """

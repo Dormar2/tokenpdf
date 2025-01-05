@@ -5,7 +5,7 @@ import toml
 import yaml
 import configparser
 
-def merge_configs(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+def merge_configs(base: Dict[str, Any], override: Dict[str, Any], *overrides) -> Dict[str, Any]:
     """
     Merges two configuration dictionaries.
 
@@ -13,6 +13,8 @@ def merge_configs(base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, A
     :param override: The overriding configuration dictionary.
     :return: A unified configuration dictionary.
     """
+    if overrides:
+        return merge_configs(merge_configs(base, override), *overrides)
     merged = base.copy()
     for key, value in override.items():
         if isinstance(value, dict) and key in merged and isinstance(merged[key], dict):
