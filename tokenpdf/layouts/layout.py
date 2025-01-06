@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Dict, Any, Generator
 
-from matplotlib.pylab import f
 from tokenpdf.utils.general import ResettableGenerator
 from tokenpdf.utils.graph import largest_connected_component
 class Layout(ABC):

@@ -1,0 +1,9 @@
+numpy
+Pillow
+papersize
+reportlab
+toml
+pyyaml
+requests
+networkx
+tqdm

@@ -1,4 +1,3 @@
-from matplotlib.units import registry
 from .system import RPGSystem, RPGSystemRegistry
 
 registry = RPGSystemRegistry()

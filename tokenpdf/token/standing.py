@@ -1,4 +1,4 @@
-from tkinter import Y
+
 from typing import Tuple
 from .token import Token
 from tokenpdf.utils.image import get_file_dimensions, complete_size

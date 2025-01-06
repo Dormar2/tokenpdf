@@ -51,6 +51,8 @@ class CanvasManager:
         config = self.config
         page_type = config.get('page_size', 'A4')
         page_size = np.array([float(m) for m in parse_papersize(page_type, "mm")])
+        if config.get("orientation", "portrait").lower() in ["landscape", "l"]:
+            page_size = page_size[::-1]
         margin_ratio = config.get("page_margin", config.get("margin", 0))
         margin = page_size * margin_ratio
         page_size_margin = page_size - 2 * margin
