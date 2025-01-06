@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+recursive-include tokenpdf *.py
+recursive-include tokenpdf *.json
+recursive-include tokenpdf *.toml
