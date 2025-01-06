@@ -17,7 +17,7 @@ setup(
         "Topic :: Games/Entertainment :: Role-Playing"
     ],
     packages=find_packages(),  # Automatically discover packages
-    python_requires=">=3.7",
+    python_requires=">=3.10",
     install_requires=[
         "numpy",
         "Pillow",
