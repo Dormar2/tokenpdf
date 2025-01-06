@@ -101,6 +101,10 @@ def load_with_imports(path: Path | str) -> Dict[str, Any]:
     return _load_with_imports(base)
             
                     
-            
+def get_data_folder() -> Path:
+    """
+    Returns the path to the data folder.
+    """
+    return Path(__file__).parent.parent / "data"
 
     

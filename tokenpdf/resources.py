@@ -120,7 +120,11 @@ class ResourceLoader:
 
         return tokens
 
-            
+    @property
+    def resources(self):
+        if self._resources is None:
+            self.load_resources()
+        return self._resources
 
     def load_resources(self, config:Dict[str,Any] = None, verbose=None) -> Dict[str, Any]:
         """

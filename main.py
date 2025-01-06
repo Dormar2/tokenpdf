@@ -1,11 +1,4 @@
-from tokenpdf.flow import run as run_tokenpdf
-
-
-def main():
-    run_tokenpdf("example.toml", verbose=True)
-
-
-
+from tokenpdf import main as tokenpdf_main
 
 if __name__ == '__main__':
-    main()
+    tokenpdf_main()

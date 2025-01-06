@@ -33,3 +33,5 @@ class ResettableGenerator:
             
     def reset(self):
         self.available = self.history[::-1].copy()
+
+

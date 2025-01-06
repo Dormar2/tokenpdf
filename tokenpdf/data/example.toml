@@ -4,7 +4,7 @@ verbose = true
 system = "D&D 5e"
 
 # Paper settings
-paper_size = "A4"
+page_size = "A2"
 orientation = "portrait"
 margin = 0.05
 

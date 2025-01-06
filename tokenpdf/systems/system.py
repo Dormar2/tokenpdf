@@ -86,7 +86,7 @@ class RPGSystemRegistry:
         return self.__bool__()
     
     def _load_defaults(self):
-        data_folder = Path(__file__).parent / "../data" / "systems"
+        data_folder = config.get_data_folder() / "systems"
         for files in data_folder.rglob("*.*"):
             if config.format_supported(files):
                 system_config = config.load_any(files)
