@@ -44,6 +44,8 @@ class ResourceLoader:
         for file_path in file_paths:
             single_config = self.load_config(file_path)
             unified_config = merge_configs(unified_config, single_config)
+        if file_paths:
+            unified_config["__config_files"] = file_paths
         self._cfg = unified_config
         return unified_config
     
@@ -136,6 +138,9 @@ class ResourceLoader:
         if verbose == None:
             verbose = config.get("verbose", False)
         resources = {} if self._resources is None else self._resources
+        
+        if not isinstance(config, dict):
+            return {}
         for key, value in config.items():
             if isinstance(value, dict):
                 inner = self.load_resources(value, verbose)
@@ -171,7 +176,9 @@ class ResourceLoader:
         print(f"Downloading resource from {url}")
         temp_file = tempfile.NamedTemporaryFile(delete=False)
         self._local_files.append(temp_file.name)
-        res = _download(url, temp_file.name, allow_rename=True)
+        res = _download(url, temp_file.name, 
+                        self._cfg.get("__config_files", []),
+                        allow_rename=True)
         print(f"Resource saved to {res}")
         return res
 
@@ -185,15 +192,26 @@ class ResourceLoader:
 
 
 
-def _download(url: str, file_path: str, allow_rename: bool = True) -> Path:
+def _download(url: str, file_path: str, 
+              config_files: List[str] = (),
+              allow_rename: bool = True) -> Path:
     """
     Downloads a file from a URL to a local path.
 
     :param url: The URL of the file to download.
     :param file_path: The local path to save the downloaded file.
     """
+    # Check if the URL is a local file
+    if url.lower().startswith("file://"):
+        return find_local_path(Path(url[7:]), config_files)
+    elif (any(url.lower().startswith(s) for s in [".", "/", "~"])
+          or url.lower()[1:3] == ":\\"):
+        return find_local_path(Path(url), config_files)
     
+
     path = Path(file_path)
+    
+    
     path.parent.mkdir(parents=True, exist_ok=True)
     response = requests.get(url)
     if response.status_code != 200:
@@ -222,6 +240,22 @@ def random_ratio(mu, sigma, rng):
     """
     return rng.lognormal(np.log(mu), sigma)
 
+
+def find_local_path(path:Path, config_files:List[str]) -> Path:
+    """
+    Finds a local path based on a configuration file.
+    :param path: The path to find.
+    :param config_files: The list of configuration files.
+    :return: The local path to the file.
+    """
+    if path.is_absolute():
+        return path
+    for config_file in config_files:
+        config_path = Path(config_file).parent
+        local_path = config_path / path
+        if local_path.is_file():
+            return local_path
+    raise FileNotFoundError(f"File {path} not found in any configuration directory")        
 
 
 def make_n(d, n):

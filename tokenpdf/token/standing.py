@@ -20,7 +20,7 @@ class StandingToken(Token):
     def apply_defaults(self, config, resources):
         config = super().apply_defaults(config, resources)
         width, height = config.get("width"), config.get("height")
-        width, height = complete_size(width, height, *get_file_dimensions(resources[config["image_url"]]), keep_aspect_ratio=config.get("keep_aspect_ratio", True))
+        width, height = complete_size(width, -1, *get_file_dimensions(resources[config["image_url"]]), keep_aspect_ratio=config.get("keep_aspect_ratio", True))
         config["width"], config["height"] = width, height
         return config
 
