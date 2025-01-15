@@ -9,8 +9,19 @@ from pyparsing import replaceWith
 from tokenpdf.utils.general import rename
 from tokenpdf.utils.verbose import vprint, vtqdm
 class FilePostProcess:
+    """ """
     @staticmethod
     def process(path, config, loader):
+        """
+
+        Args:
+          path: 
+          config: 
+          loader: 
+
+        Returns:
+
+        """
         path = Path(path)
         verbose = config.get("verbose", False)
         print = vprint(verbose)
@@ -21,6 +32,15 @@ class FilePostProcess:
 
     @staticmethod
     def compress_pdf(path, verbose=False):
+        """
+
+        Args:
+          path: 
+          verbose:  (Default value = False)
+
+        Returns:
+
+        """
         temp_name = path.with_suffix(f".{uuid4().hex[:8]}.pdf")
         tqdm = vtqdm(verbose)
         
@@ -35,6 +55,16 @@ class FilePostProcess:
                          
     @staticmethod
     def compress_pdf_pikepdf(input_path, output_path, tqdm):
+        """
+
+        Args:
+          input_path: 
+          output_path: 
+          tqdm: 
+
+        Returns:
+
+        """
         progress = tqdm(desc="Compressing PDF", total=100)
         with pikepdf.open(input_path) as pdf:
             pdf.save(output_path,

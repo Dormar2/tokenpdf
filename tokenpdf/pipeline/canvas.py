@@ -24,7 +24,17 @@ class CanvasManager:
         self.page_size, self.margin, self.page_size_margin = self._calculate_page_size()
 
     def place_tokens(self, tokens, layout, maps, mapper):
-        """Places tokens on the canvas."""
+        """Places tokens on the canvas.
+
+        Args:
+          tokens: 
+          layout: 
+          maps: 
+          mapper: 
+
+        Returns:
+
+        """
         # add map tokens
         tokens = tokens.copy()
         tokens.extend(self.make_map_tokens(maps, mapper))
@@ -55,7 +65,15 @@ class CanvasManager:
                 token.draw(canvas_page, t_cfg, self.loader, (xm, ym, *orig_size))
     
     def make_map_tokens(self, maps, mapper):
-        """Places maps on the canvas."""
+        """Places maps on the canvas.
+
+        Args:
+          maps: 
+          mapper: 
+
+        Returns:
+
+        """
         verbose = self.verbose
         tqdm = vtqdm(verbose)
         print = vprint(verbose)
@@ -88,6 +106,7 @@ class CanvasManager:
         self.canvas.cleanup()
 
     def _calculate_page_size(self):
+        """ """
         config = self.config
         page_type = config.get('page_size', 'A4')
         page_size = np.array([float(m) for m in parse_papersize(page_type, "mm")])
@@ -102,15 +121,37 @@ class CanvasManager:
     def _gen_page_size(self):
         """Generates pages (page sizes) as needed.
            Currently a constant stream of the same size
+
+        Args:
+
+        Returns:
+
         """
         while True:
             yield self.page_size_margin
 
                 
     def _make_pages(self, pages):
+        """
+
+        Args:
+          pages: 
+
+        Returns:
+
+        """
         return [self.canvas.create_page(self.page_size) for _ in pages]
     
     def _add_margin(self, size, token_cfg):
+        """
+
+        Args:
+          size: 
+          token_cfg: 
+
+        Returns:
+
+        """
         margin = token_cfg.get("margin", 0) * np.array(size)
         return size + 2 * margin, margin
   

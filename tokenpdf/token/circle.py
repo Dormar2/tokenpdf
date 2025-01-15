@@ -13,6 +13,7 @@ class CircleToken(Token):
 
     @classmethod
     def supported_types(cls):
+        """ """
         return {
             "Circle": {
                 "radius": None, "border_color": "black", "fill_color": "white",
@@ -22,6 +23,15 @@ class CircleToken(Token):
         }
 
     def apply_defaults(self, config, resources):
+        """
+
+        Args:
+          config: 
+          resources: 
+
+        Returns:
+
+        """
         config = super().apply_defaults(config, resources)
         if config["image_url"] is not None:
             if config.get("radius") is None:
@@ -33,10 +43,28 @@ class CircleToken(Token):
         return config
 
     def area(self, config, resources) -> Tuple[float, float]:
+        """
+
+        Args:
+          config: 
+          resources: 
+
+        Returns:
+
+        """
         radius = config["radius"]
         return 2 * radius, 2 * radius
     
     def _get_mask(self, config, dims):
+        """
+
+        Args:
+          config: 
+          dims: 
+
+        Returns:
+
+        """
         mask = config.get("mask")
         max_dim = max(dims)
         if mask == "circle":
@@ -45,6 +73,17 @@ class CircleToken(Token):
             return None
 
     def draw(self, canvas, config, resources, rect):
+        """
+
+        Args:
+          canvas: 
+          config: 
+          resources: 
+          rect: 
+
+        Returns:
+
+        """
         super().draw(canvas, config, resources, rect)
         radius = config["radius"]
         x, y, width, height = rect
@@ -67,6 +106,16 @@ class CircleToken(Token):
     
 
 def new_dims(radius, dims, keep_aspect_ratio):
+    """
+
+    Args:
+      radius: 
+      dims: 
+      keep_aspect_ratio: 
+
+    Returns:
+
+    """
     d = 2 * radius
     if not keep_aspect_ratio:
         return d, d

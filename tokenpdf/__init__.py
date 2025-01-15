@@ -3,6 +3,7 @@ from .utils.config import get_data_folder
 from argparse import ArgumentParser
 
 def main():
+    """ """
     parser = ArgumentParser(description="Generate PDFs of RPG tokens")
     # Configuration files (0 or more)
     parser.add_argument("config", nargs="*", help="Configuration file(s) to load. If none are provided, example.toml will be used. "

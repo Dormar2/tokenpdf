@@ -12,6 +12,20 @@ class SimpleMapper(Mapper):
             page_sizes: Generator[Tuple[float, float], None, None],
             overlap_margin: float = 0,
             verbose: bool = False) -> Result:
+        """
+
+        Args:
+          img: Map: 
+          page_sizes: Generator[Tuple[float: 
+          float]: 
+          None: 
+          None]: 
+          overlap_margin: float:  (Default value = 0)
+          verbose: bool:  (Default value = False)
+
+        Returns:
+
+        """
 
 
         img_size = np.array(img.size_on_page)

@@ -26,14 +26,16 @@ class ResourceLoader:
         """Loads a single configuration file in JSON, YAML, or TOML format.
 
         Args:
-            file_path: The path to the configuration file.
+          file_path: The path to the configuration file.
+          file_path: str: 
 
         Returns:
-            A dictionary representing the configuration.
+          : A dictionary representing the configuration.
 
         Raises:
-            ValueError: If the file format is unsupported
-            FileNotFoundError: If the file does not exist
+          ValueError: If the file format is unsupported
+          FileNotFoundError: If the file does not exist
+
         """
         c = config.load_with_imports(file_path)
         self._cfg = c
@@ -43,11 +45,13 @@ class ResourceLoader:
         """Loads multiple configuration files and unifies them.
 
         Args:
-            file_paths: A list of paths to the configuration files.
+          file_paths: A list of paths to the configuration files.
+          file_paths: List[str]: 
 
         Returns:
-            A unified dictionary representing the combined
-            configuration.
+          : A unified dictionary representing the combined
+          configuration.
+
         """
         unified_config = {}
         for file_path in file_paths:
@@ -62,10 +66,14 @@ class ResourceLoader:
         """Generates token specifications based on the configuration.
 
         Args:
-            config: The configuration dictionary.
+          config: The configuration dictionary.
+          config: Dict[str: 
+          Any]:  (Default value = None)
+          verbose:  (Default value = None)
 
         Returns:
-            A dictionary of generated tokens.
+          : A dictionary of generated tokens.
+
         """
         config = config if config is not None else self._cfg
         if config is None:
@@ -134,10 +142,14 @@ class ResourceLoader:
         """Generates map specifications based on the configuration.
 
         Args:
-            config: The configuration dictionary.
+          config: The configuration dictionary.
+          config: Dict[str: 
+          Any]:  (Default value = None)
+          verbose:  (Default value = None)
 
         Returns:
-            A dictionary of generated maps.
+          : A dictionary of generated maps.
+
         """
         config = config if config is not None else self._cfg
         if config is None:
@@ -167,6 +179,7 @@ class ResourceLoader:
 
     @property
     def resources(self):
+        """ """
         if self._resources is None:
             self.load_resources()
         return self._resources
@@ -175,12 +188,16 @@ class ResourceLoader:
         """Load resources specified in the configuration.
 
         Args:
-            config: The configuration dictionary.
+          config: The configuration dictionary.
+          config:Dict[str: 
+          Any]:  (Default value = None)
+          verbose:  (Default value = None)
 
         Returns:
-            A dictionary of loaded resources. Structure is similar to
-            configuration, except that paths are replaced with loaded
-            resources.
+          : A dictionary of loaded resources. Structure is similar to
+          configuration, except that paths are replaced with loaded
+          resources.
+
         """
         config = config if config is not None else self._cfg
         if config is None:
@@ -219,10 +236,13 @@ class ResourceLoader:
         """Saves a local copy of the resource and returns the path.
 
         Args:
-            url: The URL of the resource.
+          url: The URL of the resource.
+          url: str: 
+          verbose:  (Default value = False)
 
         Returns:
-            The local path to the resource.
+          : The local path to the resource.
+
         """
         # Download the resource from the URL
         print = vprint(verbose)
@@ -251,8 +271,16 @@ def _download(url: str, file_path: str,
     """Downloads a file from a URL to a local path.
 
     Args:
-        url: The URL of the file to download.
-        file_path: The local path to save the downloaded file.
+      url: The URL of the file to download.
+      file_path: The local path to save the downloaded file.
+      url: str: 
+      file_path: str: 
+      config_files: List[str]:  (Default value = ())
+      allow_rename: bool:  (Default value = True)
+      verbose:bool:  (Default value = False)
+
+    Returns:
+
     """
     # Check if the URL is a local file
     if url.lower().startswith("file://"):
@@ -287,12 +315,13 @@ def random_ratio(mu, sigma, rng):
     """Generates a random ratio, log-normally distributed around a mean.
 
     Args:
-        mu: The mean of the distribution.
-        sigma: The standard deviation of the distribution.
-        rng: The random number generator.
+      mu: The mean of the distribution.
+      sigma: The standard deviation of the distribution.
+      rng: The random number generator.
 
     Returns:
-        A random ratio.
+      : A random ratio.
+
     """
     return rng.lognormal(np.log(mu), sigma)
 
@@ -301,11 +330,15 @@ def find_local_path(path:Path, config_files:List[str], verbose:bool = False) -> 
     """Finds a local path based on a configuration file.
 
     Args:
-        path: The path to find.
-        config_files: The list of configuration files.
+      path: The path to find.
+      config_files: The list of configuration files.
+      path:Path: 
+      config_files:List[str]: 
+      verbose:bool:  (Default value = False)
 
     Returns:
-        The local path to the file.
+      : The local path to the file.
+
     """
     print = vprint(verbose)
     print(f"Looking for local path {path}")
@@ -323,4 +356,13 @@ def find_local_path(path:Path, config_files:List[str], verbose:bool = False) -> 
 
 
 def make_n(d, n):
+    """
+
+    Args:
+      d: 
+      n: 
+
+    Returns:
+
+    """
     return [d.copy() for _ in range(n)]

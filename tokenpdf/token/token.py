@@ -6,6 +6,11 @@ from tokenpdf.utils.config import merge_configs
 class Token(ABC):
     """Abstract base class for tokens.
     Defines the interface for all token types.
+
+    Args:
+
+    Returns:
+
     """
 
     TOKEN_REGISTRY = None
@@ -16,6 +21,11 @@ class Token(ABC):
         """Returns a dictionary mapping supported types to their expected configuration values
         and default values. Example:
         #TODO
+
+        Args:
+
+        Returns:
+
         """
         pass
 
@@ -23,9 +33,15 @@ class Token(ABC):
         """Applies default values to the configuration dictionary after loading resources
 
         Args:
-            config: The configuration dictionary for the token instance.
-            resources: The resources loaded for the token instance (e.g.
-                fonts, images).
+          config: The configuration dictionary for the token instance.
+          resources: The resources loaded for the token instance (e.g.
+        fonts, images).
+          config: Dict[str: 
+          Any]: 
+          resources: Dict[str: 
+
+        Returns:
+
         """
         return config
 
@@ -35,9 +51,12 @@ class Token(ABC):
         Should be based on the configuration of the token instance.
 
         Args:
-            config: The configuration dictionary for the token instance.
-            resources: The resources loaded for the token instance (e.g.
-                fonts, images).
+          config: The configuration dictionary for the token instance.
+          resources: The resources loaded for the token instance (e.g.
+        fonts, images).
+
+        Returns:
+
         """
         pass
 
@@ -45,8 +64,13 @@ class Token(ABC):
         """Draws the token on the specified rectangle area.
 
         Args:
-            canvas: The drawing surface (PDF canvas, for example).
-            rect: The rectangle (x, y, width, height) defining the area.
+          canvas: The drawing surface (PDF canvas, for example).
+          rect: The rectangle (x, y, width, height) defining the area.
+          config: 
+          resources: 
+
+        Returns:
+
         """
         if config.get("rect_border_thickness") is not None:
             canvas.rect(*rect, stroke=config.get("rect_border_thickness", None),
@@ -72,7 +96,10 @@ class TokenRegistry:
         """Registers a token class.
 
         Args:
-            cls: The token class to register.
+          cls: The token class to register.
+
+        Returns:
+
         """
         supported_types = cls.supported_types()
         for token_type, config in supported_types.items():
@@ -85,12 +112,13 @@ class TokenRegistry:
         """Creates a new token instance of the specified type.
 
         Args:
-            config: The configuration dictionary for the token instance.
-            resources: The resources loaded for the token instance (e.g.
-                fonts, images).
+          config: The configuration dictionary for the token instance.
+          resources: The resources loaded for the token instance (e.g.
+        fonts, images).
 
         Returns:
-            A new token instance.
+          : A new token instance.
+
         """
         token_type = config.get("type", "Circle").lower()
         if token_type not in self._token_types:

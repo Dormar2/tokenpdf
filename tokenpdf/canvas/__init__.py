@@ -4,10 +4,11 @@ def make_canvas(config):
     """Factory function to create a canvas based on the configuration.
 
     Args:
-        config: Dictionary of configuration options for the canvas.
+      config: Dictionary of configuration options for the canvas.
 
     Returns:
-        A new canvas instance.
+      : A new canvas instance.
+
     """
     TYPE_DEFAULTS = {'pdf':'reportlab', '':'reportlab'}
     if "output_format" not in config and "canvas" not in config:

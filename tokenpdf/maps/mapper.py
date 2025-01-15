@@ -13,6 +13,7 @@ Result = Sequence[Tuple[int, MapFragment, Rectangle]]
 
 
 class Mapper(abc.ABC):
+    """ """
     
     def __init__(self, config):
         self.config = config
@@ -21,11 +22,29 @@ class Mapper(abc.ABC):
     @abc.abstractmethod
     def map(self, map: Map, page_sizes: Generator[Tuple[float, float], None, None],
         verbose: bool = False) -> Result:
+        """
+
+        Args:
+          map: Map: 
+          page_sizes: Generator[Tuple[float: 
+          float]: 
+          None: 
+          None]: 
+          verbose: bool:  (Default value = False)
+
+        Returns:
+
+        """
         pass
 
 class KnownPagesMapper(Mapper):
     """Maps a map to a set of known page sizes,
     similar to the KnownPagesLayout layout.
+
+    Args:
+
+    Returns:
+
     """
     
     def __init__(self, config, loader):
@@ -33,6 +52,19 @@ class KnownPagesMapper(Mapper):
     
     def map(self, map: Map, page_sizes: Generator[Tuple[float, float], None, None],
         verbose: bool = False) -> Result:
+        """
+
+        Args:
+          map: Map: 
+          page_sizes: Generator[Tuple[float: 
+          float]: 
+          None: 
+          None]: 
+          verbose: bool:  (Default value = False)
+
+        Returns:
+
+        """
         pages = [next(page_sizes)]
         while True:
             try:
@@ -49,6 +81,16 @@ class KnownPagesMapper(Mapper):
         
     @abc.abstractmethod 
     def map_on_pages(self, map: Image, page_sizes: Sequence[Tuple[float, float]], verbose: bool = False) -> Result:
-        """Maps a map to a set of known page sizes."""
+        """Maps a map to a set of known page sizes.
+
+        Args:
+          map: Image: 
+          page_sizes: Sequence[Tuple[float: 
+          float]]: 
+          verbose: bool:  (Default value = False)
+
+        Returns:
+
+        """
         pass
     

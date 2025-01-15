@@ -9,6 +9,7 @@ from PIL import Image
 
 
 class MapFragment(Token):
+    """ """
     def __init__(self, map, rect, misc_margin, system, section=None):
         self.map = map
         self.rect = rect
@@ -29,6 +30,7 @@ class MapFragment(Token):
 
     @staticmethod
     def supported_types():
+        """ """
         return {
             "map_fragment": {
                 "image_url": None, "grid": None, "dpi": 120, "overlap_margin": 0
@@ -36,20 +38,43 @@ class MapFragment(Token):
         }
     @property
     def width(self):
+        """ """
         return self.rect[2] + self.misc_margin[0]
     
     @property
     def height(self):
+        """ """
         return self.rect[3] + self.misc_margin[1]
     
     @property
     def text(self)->str:
+        """ """
         return f"{self.map.name}: {self.section[0]},{self.section[1]}" if self.section is not None else self.map.name
     
     def area(self, config, resources):
+        """
+
+        Args:
+          config: 
+          resources: 
+
+        Returns:
+
+        """
         return self.width, self.height
     
     def draw(self, canvas, config, resources, rect):
+        """
+
+        Args:
+          canvas: 
+          config: 
+          resources: 
+          rect: 
+
+        Returns:
+
+        """
         factor2 = np.array([*self.map.factor, *self.map.factor])
         rect_in_image = np.array(self.rect)/factor2
         
@@ -80,6 +105,7 @@ class MapFragment(Token):
         
 
 class Map:
+    """ """
     def __init__(self, config, loader, system):
         self.config = config
         self.name = config.get("name", "Map")
@@ -109,17 +135,31 @@ class Map:
             self.img = add_grid(self.img, self.size_in_cells, grid_color)
     @property
     def size_on_page(self):
+        """ """
         return self.width, self.height
     
     @property
     def size_in_cells(self):
+        """ """
         return self.system.page_to_cells([self.width, self.height])
     
     @property
     def overlap_margin(self):
+        """ """
         return self.system.cells_to_page(self.config.get("overlap_margin", 0))
     
     def fragment(self, rect, misc_margin = np.array([0,0]), section=None) -> MapFragment:
+        """
+
+        Args:
+          rect: 
+          misc_margin:  (Default value = np.array([0)
+          0]): 
+          section:  (Default value = None)
+
+        Returns:
+
+        """
         return MapFragment(self, rect, misc_margin, self.system, section)
 
         

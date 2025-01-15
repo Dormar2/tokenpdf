@@ -8,12 +8,17 @@ def largest_connected_component(
     """Finds the largest connected component in a graph of items.
 
     Args:
-        items: A sequence of items to be connected.
-        is_connected: A function that returns True if two items are
-            connected.
+      items: A sequence of items to be connected.
+      is_connected: A function that returns True if two items are
+    connected.
+      items: Sequence[Any]: 
+      is_connected: Callable[[Any: 
+      Any]: 
+      bool]: 
 
     Returns:
-        A list of items in the largest connected component.
+      : A list of items in the largest connected component.
+
     """
     graph = nx.Graph()
     graph.add_nodes_from(items)

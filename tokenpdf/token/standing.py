@@ -5,9 +5,11 @@ from tokenpdf.utils.image import get_file_dimensions, complete_size
 import numpy as np
 
 class StandingToken(Token):
+    """ """
 
     @classmethod
     def supported_types(cls):
+        """ """
         return {
             "standing": {
                 "width": None, "height": None, "border_color": "black", "fill_color": "white",
@@ -18,6 +20,15 @@ class StandingToken(Token):
         }
     
     def apply_defaults(self, config, resources):
+        """
+
+        Args:
+          config: 
+          resources: 
+
+        Returns:
+
+        """
         config = super().apply_defaults(config, resources)
         width, height = config.get("width"), config.get("height")
         width, height = complete_size(width, -1, *get_file_dimensions(resources[config["image_url"]]), keep_aspect_ratio=config.get("keep_aspect_ratio", True))
@@ -27,6 +38,15 @@ class StandingToken(Token):
         
 
     def area(self, config, resources) -> Tuple[float, float]:
+        """
+
+        Args:
+          config: 
+          resources: 
+
+        Returns:
+
+        """
         sarea = self._standing_area(config, resources)
         barea = self._base_area(config, resources, sarea)
         w = sarea[0]
@@ -35,13 +55,43 @@ class StandingToken(Token):
 
 
     def _base_area(self, config, resources, standing_area) -> Tuple[float, float]:
+        """
+
+        Args:
+          config: 
+          resources: 
+          standing_area: 
+
+        Returns:
+
+        """
         base = standing_area[0]
         return np.array([base, base/2])
 
     def _standing_area(self, config, resources) -> Tuple[float, float]:
+        """
+
+        Args:
+          config: 
+          resources: 
+
+        Returns:
+
+        """
         return np.array([config["width"], config["height"]])
     
     def draw(self, canvas, config, resources, rect):
+        """
+
+        Args:
+          canvas: 
+          config: 
+          resources: 
+          rect: 
+
+        Returns:
+
+        """
         super().draw(canvas, config, resources, rect)
         x, y, width, height = rect
         xy = np.array([x, y])

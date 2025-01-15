@@ -8,10 +8,12 @@ def make_layout(config: dict) -> Layout:
     """Factory function to create a layout object based on the given configuration.
 
     Args:
-        config: The configuration dictionary for the layout.
+      config: The configuration dictionary for the layout.
+      config: dict: 
 
     Returns:
-        A layout object.
+      : A layout object.
+
     """
     layout_type = str(config.get("layout", "rectpack_best")).lower()
     if layout_type in ["greedy", ""]:

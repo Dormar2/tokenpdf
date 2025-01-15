@@ -5,6 +5,11 @@ from typing import Tuple, Generator
 class ResettableGenerator:
     """A generator that can be reset to its initial state,
     saves all values it has generated so far.
+
+    Args:
+
+    Returns:
+
     """
     def __init__(self, gen, reset_on_stop=True):
         self.gen = gen
@@ -28,11 +33,13 @@ class ResettableGenerator:
                     raise
             
     def _consume(self):
+        """ """
         next_val = next(self.gen)
         self.history.append(next_val)
         return next_val
             
     def reset(self):
+        """ """
         self.available = self.history[::-1].copy()
 
 
@@ -40,6 +47,13 @@ class ResettableGenerator:
 def consume(generator, n):
     """Consume up to n items from a generator and return them in a list.
        If no items are left, raises StopIteration.
+
+    Args:
+      generator: 
+      n: 
+
+    Returns:
+
     """
     res = [None] * n
     length = 0
@@ -59,6 +73,11 @@ class Rename:
     """A context manager that renames a file when entering and renames it back when exiting.
     Useful for "inplace" processing of a file, while making sure that if the processing fails,
     the original file is not lost.
+
+    Args:
+
+    Returns:
+
     """
     def __init__(self, path : Path, to : Path, delete_on_cancel=False):
         self.path = path
@@ -71,6 +90,7 @@ class Rename:
         return self
     
     def cancel(self):
+        """ """
         self._disable = True
         if self.delete_on_cancel and self.to.exists():
             self.to.unlink()

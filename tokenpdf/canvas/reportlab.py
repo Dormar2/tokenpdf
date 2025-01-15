@@ -14,6 +14,7 @@ import contextlib
 import numpy as np
 
 class ReportLabCanvasPage(CanvasPage):
+    """ """
     def __init__(self, canvas, width: float, height: float, background: str = None):
         super().__init__(canvas)
         self.pdf_canvas = canvas.pdf
@@ -26,7 +27,14 @@ class ReportLabCanvasPage(CanvasPage):
             self.commands.append(("image", 0, 0, width, height, background))
 
     def _execute_commands(self, verbose: bool = False):
-        """Execute all drawing commands on the canvas."""
+        """Execute all drawing commands on the canvas.
+
+        Args:
+          verbose: bool:  (Default value = False)
+
+        Returns:
+
+        """
         tqdm = vtqdm(verbose)
         for command in tqdm(self.commands, desc="Executing Page Commands", leave=False):
             cmd_type = command[0]
@@ -60,25 +68,113 @@ class ReportLabCanvasPage(CanvasPage):
 
     def _image(self, x: float, y: float, width: float, height: float, image_path: str, mask: Any = None,
               flip: Tuple[bool, bool] = (False, False), rotate: float = 0):
+        """
+
+        Args:
+          x: float: 
+          y: float: 
+          width: float: 
+          height: float: 
+          image_path: str: 
+          mask: Any:  (Default value = None)
+          flip: Tuple[bool: 
+          bool]:  (Default value = (False)
+          False): 
+          rotate: float:  (Default value = 0)
+
+        Returns:
+
+        """
         self.commands.append(("image", x, y, width, height, image_path, mask, flip, rotate))
 
     def text(self, x: float, y: float, text: str, font: str = "Helvetica", size: int = 12, rotate: float = 0):
+        """
+
+        Args:
+          x: float: 
+          y: float: 
+          text: str: 
+          font: str:  (Default value = "Helvetica")
+          size: int:  (Default value = 12)
+          rotate: float:  (Default value = 0)
+
+        Returns:
+
+        """
         self.commands.append(("text", x, y, text, font, size, rotate))
 
     def circle(self, x: float, y: float, radius: float, stroke: bool = True, fill: bool = False):
+        """
+
+        Args:
+          x: float: 
+          y: float: 
+          radius: float: 
+          stroke: bool:  (Default value = True)
+          fill: bool:  (Default value = False)
+
+        Returns:
+
+        """
         self.commands.append(("circle", x, y, radius, stroke, fill))
 
     def line(self, x1: float, y1: float, x2: float, y2: float, color: Tuple[int, int, int] = (0, 0, 0), 
              thickness: float = 1, style: str = "solid"):
+        """
+
+        Args:
+          x1: float: 
+          y1: float: 
+          x2: float: 
+          y2: float: 
+          color: Tuple[int: 
+          int: 
+          int]:  (Default value = (0)
+          0: 
+          0): 
+          thickness: float:  (Default value = 1)
+          style: str:  (Default value = "solid")
+
+        Returns:
+
+        """
         self.commands.append(("line", x1, y1, x2, y2, color, thickness, style))
     
     def rect(self, x: float, y: float, width: float, height: float, stroke: int = 1, fill: int = 0,
             color: Tuple[int, int, int] = (0, 0, 0), style: str = "solid"):
+        """
+
+        Args:
+          x: float: 
+          y: float: 
+          width: float: 
+          height: float: 
+          stroke: int:  (Default value = 1)
+          fill: int:  (Default value = 0)
+          color: Tuple[int: 
+          int: 
+          int]:  (Default value = (0)
+          0: 
+          0): 
+          style: str:  (Default value = "solid")
+
+        Returns:
+
+        """
         self.commands.append(("rect", x, y, width, height, stroke, fill, color, style))
 
     @contextlib.contextmanager
     def _stroke_color(self, color: Tuple[int, int, int] | str | None) -> contextlib.contextmanager:
-        """Set the stroke color for the context."""
+        """Set the stroke color for the context.
+
+        Args:
+          color: Tuple[int: 
+          int: 
+          int] | str | None: 
+
+        Returns:
+
+        """
         if color is None:
             yield
             return
@@ -91,7 +187,14 @@ class ReportLabCanvasPage(CanvasPage):
     
     @contextlib.contextmanager
     def _stroke_style(self, style: str | None) -> contextlib.contextmanager:
-        """Set the stroke style for the context."""
+        """Set the stroke style for the context.
+
+        Args:
+          style: str | None: 
+
+        Returns:
+
+        """
         if style is None:
             yield
             return
@@ -118,7 +221,14 @@ class ReportLabCanvasPage(CanvasPage):
 
     @contextlib.contextmanager
     def _stroke_thickness(self, thickness: float | None) -> contextlib.contextmanager:
-        """Set the stroke thickness for the context."""
+        """Set the stroke thickness for the context.
+
+        Args:
+          thickness: float | None: 
+
+        Returns:
+
+        """
         if thickness is None:
             yield
             return
@@ -128,7 +238,15 @@ class ReportLabCanvasPage(CanvasPage):
         self.pdf_canvas.setLineWidth(orig_thickness)
     @contextlib.contextmanager
     def _rotation(self, angle: float, *args) -> contextlib.contextmanager:
-        """Rotate the canvas for the context."""
+        """Rotate the canvas for the context.
+
+        Args:
+          angle: float: 
+          *args: 
+
+        Returns:
+
+        """
         if angle == 0:
             yield args
             return
@@ -144,18 +262,36 @@ class ReportLabCanvasPage(CanvasPage):
 
 
 class ReportLabCanvas(Canvas):
+    """ """
     def __init__(self, config: Dict[str, Any], file_path: str | None = None):
         super().__init__(config, file_path)
         self.pdf = reportlab_canvas.Canvas(config.get("output_file", file_path))
         self.pages = []  # Track pages
 
     def create_page(self, size: Tuple[float, float], background: str = None) -> CanvasPage:
+        """
+
+        Args:
+          size: Tuple[float: 
+          float]: 
+          background: str:  (Default value = None)
+
+        Returns:
+
+        """
         page = ReportLabCanvasPage(self, size[0], size[1], background)
         self.pages.append(page)
         return page
 
     def save(self, verbose: bool = False):
-        """Finalize all pages and save the PDF."""
+        """Finalize all pages and save the PDF.
+
+        Args:
+          verbose: bool:  (Default value = False)
+
+        Returns:
+
+        """
         
         tqdm = vtqdm(verbose)
         for page in tqdm(self.pages, desc="Saving pages"):
@@ -171,13 +307,20 @@ def apply_image_filters(image_path, mask=None, flip: Tuple[bool, bool] = (False,
     """Apply filters to an image.
 
     Args:
-        mask: The mask to apply to the image.
-        flip: A tuple of booleans indicating whether to flip the image
-            horizontally and vertically.
-        rotate: The angle to rotate the image.
+      mask: The mask to apply to the image. (Default value = None)
+      flip: A tuple of booleans indicating whether to flip the image
+    horizontally and vertically.
+      rotate: The angle to rotate the image.
+      image_path: 
+      flip: Tuple[bool: 
+      bool]:  (Default value = (False)
+      False): 
+      rotate: float:  (Default value = 0)
+      **kw: 
 
     Returns:
-        A context to hold the file on disk
+      : A context to hold the file on disk
+
     """
     
     if mask is None and flip == (False, False) and rotate == 0:

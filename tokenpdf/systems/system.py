@@ -4,6 +4,7 @@ import numpy as np
 import tokenpdf.utils.config as config
 
 class RPGSystem:
+    """ """
     def __init__(self, config):
         self.config = config
         self.name : str = config["name"]
@@ -15,6 +16,14 @@ class RPGSystem:
         self.world_coords_unit : str = config["cell_size"]["unit"]
 
     def token_size(self, name) -> np.ndarray:
+        """
+
+        Args:
+          name: 
+
+        Returns:
+
+        """
         name = name.lower()
         sz = self.world_to_page(self.token_sizes[name])
         if isinstance(sz, float) or isinstance(sz, int) or len(sz) == 1:
@@ -22,40 +31,105 @@ class RPGSystem:
         return np.array(sz)
     
     def world_to_cells(self, world_coords) -> np.ndarray:
+        """
+
+        Args:
+          world_coords: 
+
+        Returns:
+
+        """
         wc = np.array(world_coords)
         return (wc / self.cell_size_in_world_coords)
     
     def cells_to_world(self, cell_coords) -> np.ndarray:
+        """
+
+        Args:
+          cell_coords: 
+
+        Returns:
+
+        """
         cc = np.array(cell_coords)
         return (cc * self.cell_size_in_world_coords)
     
         
     def page_to_cells(self, page_coords) -> np.ndarray:
+        """
+
+        Args:
+          page_coords: 
+
+        Returns:
+
+        """
         pc = np.array(page_coords)
         return (pc / self.cell_size_in_mm)
 
     def cells_to_page(self, cell_coords) -> np.ndarray:
+        """
+
+        Args:
+          cell_coords: 
+
+        Returns:
+
+        """
         cc = np.array(cell_coords)
         return (cc * self.cell_size_in_mm)
 
     def world_to_page(self, world_coords) -> np.ndarray:
+        """
+
+        Args:
+          world_coords: 
+
+        Returns:
+
+        """
         return self.cells_to_page(self.world_to_cells(world_coords))
 
     def page_to_world(self, page_coords) -> np.ndarray:
+        """
+
+        Args:
+          page_coords: 
+
+        Returns:
+
+        """
         return self.cells_to_world(self.page_to_cells(page_coords))    
         
         
         
 
 class RPGSystemRegistry:
+    """ """
     def __init__(self):
         self.systems = {}
         self._load_defaults()
     
     def add_system(self, system):
+        """
+
+        Args:
+          system: 
+
+        Returns:
+
+        """
         self.systems[system.name] = system
     
     def get_system(self, name):
+        """
+
+        Args:
+          name: 
+
+        Returns:
+
+        """
         return self.systems[name]
     
     def __getitem__(self, name):
@@ -86,6 +160,7 @@ class RPGSystemRegistry:
         return self.__bool__()
     
     def _load_defaults(self):
+        """ """
         data_folder = config.get_data_folder() / "systems"
         for files in data_folder.rglob("*.*"):
             if config.format_supported(files):

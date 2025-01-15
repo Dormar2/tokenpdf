@@ -13,10 +13,12 @@ def get_file_dimensions(file_path: str | Image.Image) -> Tuple[int, int]:
     """Get the dimensions of an image file.
 
     Args:
-        file_path: The path to the image file.
+      file_path: The path to the image file.
+      file_path: str | Image.Image: 
 
     Returns:
-        A tuple of the width and height of the image.
+      : A tuple of the width and height of the image.
+
     """
     if isinstance(file_path, Image.Image):
         return file_path.size
@@ -27,11 +29,15 @@ def complete_size(width, height, image_width, image_height, keep_aspect_ratio:bo
     """Complete the size of an object based on the image dimensions.
 
     Args:
-        width: The width of the object. (None or -1 to indicate auto)
-        height: The height of the object. (None or -1 to indicate auto)
-        image_width: The width of the image.
-        image_height: The height of the image.
-        keep_aspect_ratio: If True, keep the aspect ratio of the image.
+      width: The width of the object. (None or -1 to indicate auto)
+      height: The height of the object. (None or -1 to indicate auto)
+      image_width: The width of the image.
+      image_height: The height of the image.
+      keep_aspect_ratio: If True, keep the aspect ratio of the image.
+      keep_aspect_ratio:bool:  (Default value = False)
+
+    Returns:
+
     """
     no_width = width is None or width < 0
     no_height = height is None or height < 0
@@ -53,10 +59,13 @@ def dpmm(config: dict, default:float = 300/25.4) -> float:
     """Calculate the dots per millimeter (dpmm) based on the configuration.
 
     Args:
-        config: The configuration dictionary.
+      config: The configuration dictionary.
+      config: dict: 
+      default:float:  (Default value = 300/25.4)
 
     Returns:
-        The calculated dpmm value.
+      : The calculated dpmm value.
+
     """
     return config.get("dpmm", config.get("dpi", default*25.4)/25.4)
 
@@ -64,6 +73,12 @@ def dpmm(config: dict, default:float = 300/25.4) -> float:
 def to_float_np_image(arr:np.ndarray) -> np.ndarray:
     """Convert an array to float32 and normalize the values to the range [0, 1].
     Arrays of type float are assumed to be already normalized.
+
+    Args:
+      arr:np.ndarray: 
+
+    Returns:
+
     """
     if arr.dtype == bool:
         return arr.astype(np.float32)
@@ -77,6 +92,12 @@ def to_float_np_image(arr:np.ndarray) -> np.ndarray:
 def to_uint8_np_image(arr:np.ndarray) -> np.ndarray:
     """Convert an array to uint8 and scale the values to the range [0, 255].
     Arrays of type uint8 and float are assumed to be normalized.
+
+    Args:
+      arr:np.ndarray: 
+
+    Returns:
+
     """
     if arr.dtype == np.uint8:
         return arr
@@ -87,13 +108,18 @@ def join_mask_channel(image: Image.Image, mask: np.ndarray,
     """Join the mask as an alpha channel to the image.
 
     Args:
-        image: The image to add the mask to.
-        mask: The mask as a boolean array.
-        blend: If True and image has an alpha channel, blend the mask
-            with the alpha channel.
+      image: The image to add the mask to.
+      mask: The mask as a boolean array.
+      blend: If True and image has an alpha channel, blend the mask
+    with the alpha channel.
+      image: Image.Image: 
+      mask: np.ndarray: 
+      blend:bool:  (Default value = False)
+      allow_resize:bool:  (Default value = False)
 
     Returns:
-        The image with the mask as an alpha channel.
+      : The image with the mask as an alpha channel.
+
     """
     if image.mode == "RGBA" and blend:
         image_alpha = np.array(image)[:, :, 3]
@@ -109,6 +135,14 @@ def join_mask_channel(image: Image.Image, mask: np.ndarray,
     return image
 
 def circle_mask(radius):
+    """
+
+    Args:
+      radius: 
+
+    Returns:
+
+    """
     x = np.linspace(-radius, radius, np.round(2 * radius).astype(int))
     y = np.linspace(-radius, radius, np.round(2 * radius).astype(int))
     X, Y = np.meshgrid(x, y)
@@ -116,6 +150,14 @@ def circle_mask(radius):
     return to_image(mask)
 
 def to_image(obj):
+    """
+
+    Args:
+      obj: 
+
+    Returns:
+
+    """
     if isinstance(obj, Image.Image):
         return obj
     elif isinstance(obj, str) or isinstance(obj, Path):
@@ -132,7 +174,20 @@ def to_image(obj):
 def TemporaryCropImageFile(image : Image.Image | Path | str,
                            roi: Tuple[int, int, int, int], 
                            delete: bool = True, suffix: str = ".png", **kw) -> NamedTemporaryFile:
-    """Temporary file for cropped images."""
+    """Temporary file for cropped images.
+
+    Args:
+      image : Image.Image | Path | str: 
+      roi: Tuple[int: 
+      int: 
+      int]: 
+      delete: bool:  (Default value = True)
+      suffix: str:  (Default value = ".png")
+      **kw: 
+
+    Returns:
+
+    """
     if isinstance(image, Path) or isinstance(image, str):
         image = Image.open(image)
     roi = np.array(roi)
@@ -142,7 +197,17 @@ def TemporaryCropImageFile(image : Image.Image | Path | str,
 
 @contextmanager
 def TemporaryFilepathForImage(image : Image.Image | Path | str, delete: bool = True, suffix: str = ".png", **kw) -> Generator[NamedTemporaryFile, None, None]:
-    """Temporary file for images."""
+    """Temporary file for images.
+
+    Args:
+      image : Image.Image | Path | str: 
+      delete: bool:  (Default value = True)
+      suffix: str:  (Default value = ".png")
+      **kw: 
+
+    Returns:
+
+    """
     if isinstance(image, Path) or isinstance(image, str):
         image = Image.open(image)
     with NamedTemporaryFile(suffix=suffix, delete=delete, delete_on_close=True) as tmp:
@@ -155,12 +220,17 @@ def add_grid(img : Image.Image, grid: Tuple[int,int], color: str = "black") -> I
     """Add a grid to an image.
 
     Args:
-        img: The image to add the grid to.
-        grid: The grid size as a tuple of (width, height).
-        color: The color of the grid.
+      img: The image to add the grid to.
+      grid: The grid size as a tuple of (width, height).
+      color: The color of the grid.
+      img : Image.Image: 
+      grid: Tuple[int: 
+      int]: 
+      color: str:  (Default value = "black")
 
     Returns:
-        The image with the grid added.
+      : The image with the grid added.
+
     """
     grid = np.round(np.array(grid)).astype(int)
     img = img.convert("RGBA")

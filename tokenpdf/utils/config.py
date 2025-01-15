@@ -9,11 +9,16 @@ def merge_configs(base: Dict[str, Any], override: Dict[str, Any], *overrides) ->
     """Merges two configuration dictionaries.
 
     Args:
-        base: The base configuration dictionary.
-        override: The overriding configuration dictionary.
+      base: The base configuration dictionary.
+      override: The overriding configuration dictionary.
+      base: Dict[str: 
+      Any]: 
+      override: Dict[str: 
+      *overrides: 
 
     Returns:
-        A unified configuration dictionary.
+      : A unified configuration dictionary.
+
     """
     if overrides:
         return merge_configs(merge_configs(base, override), *overrides)
@@ -26,6 +31,14 @@ def merge_configs(base: Dict[str, Any], override: Dict[str, Any], *overrides) ->
     return merged
 
 def format_supported(path: Path | str) -> bool:
+    """
+
+    Args:
+      path: Path | str: 
+
+    Returns:
+
+    """
     suffix = Path(path).suffix.lower()
     return suffix in [".json", ".toml", ".yaml", ".yml", ".ini", ".cfg"]
 
@@ -34,10 +47,12 @@ def load_any(path: Path | str) -> Dict[str, Any]:
     Supported: JSON, TOML, YAML, INI (ConfigParser).
 
     Args:
-        path: The path to the configuration file.
+      path: The path to the configuration file.
+      path: Path | str: 
 
     Returns:
-        A dictionary of configuration options.
+      : A dictionary of configuration options.
+
     """
     path = Path(path)
     if not path.exists():
@@ -59,23 +74,37 @@ def load_any(path: Path | str) -> Dict[str, Any]:
 def load_with_imports(path: Path | str) -> Dict[str, Any]:
     """Loads a configuration file with support for importing other configuration files.
     Supported file Formats: JSON, TOML, YAML, INI (ConfigParser).
-
+    
     Syntax for importing is one of the following:
     - As a key name, use "@import: <any text>" as key and a file path as the value.
         This will result in merging the imported file into the parent dictionary.
         The <any text> is ignored, and can be used to describe the import.
     - As a value, use any key name, and "@import: <file path>" as the value.
         This will replace the value with the imported file.
-
+    
     References files can be in different formats.
     The paths are assumed relative to the configuration file being loaded, unless they are absolute.
     To use paths relative to cwd, have the path start with "./".
-
+    
     Note: In toml, this can be acheived by using quoted keys, e.g. "@import: this is a description" = "path/to/file.json"
+
+    Args:
+      path: Path | str: 
+
+    Returns:
+
     """
     path = Path(path)
 
     def get_path(p : Path) -> Path:
+        """
+
+        Args:
+          p : Path: 
+
+        Returns:
+
+        """
         if p.is_absolute():
             return p
         if p.parts[0] == ".":
@@ -85,6 +114,15 @@ def load_with_imports(path: Path | str) -> Dict[str, Any]:
     base = load_any(path)
 
     def _load_with_imports(current: Dict[str, Any]) -> Dict[str, Any]:
+        """
+
+        Args:
+          current: Dict[str: 
+          Any]: 
+
+        Returns:
+
+        """
         if isinstance(current, dict):
             new_dict = {}
             for k,v in current.items():

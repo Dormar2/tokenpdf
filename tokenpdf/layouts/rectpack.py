@@ -59,16 +59,21 @@ class RectPackLayout(KnownPagesLayout):
         """Arranges tokens on pages based on their sizes and page constraints.
 
         Args:
-            token_sizes: A list of tuples representing token widths and
-                heights in mm.
-            page_sizes: A list of tuples representing page widths and
-                heights in mm.
-            verbose: Whether to print progress information.
+          token_sizes: A list of tuples representing token widths and
+        heights in mm.
+          page_sizes: A list of tuples representing page widths and
+        heights in mm.
+          verbose: Whether to print progress information.
+          token_sizes: List[Tuple[float: 
+          float]]: 
+          page_sizes: List[Tuple[float: 
+          verbose: bool:  (Default value = False)
 
         Returns:
-            A list of pages, where each page is a list of tuples
-            containing the token index and the placement rectangle (x,
-            y, width, height)
+          : A list of pages, where each page is a list of tuples
+          containing the token index and the placement rectangle (x,
+          y, width, height)
+
         """
         # Create a new packer
         packer = rectpack.newPacker(
@@ -115,15 +120,29 @@ def make_rectpack_layouts(bin_algo:str|None|List[str]|Tuple[str] = None,
     """Factory function to create a RectPackLayout with the given configuration.
 
     Args:
-        bin_algo: The bin packing algorithm to use.
-        pack_algo: The packing algorithm to use.
-        sort_algo: The sorting algorithm to use.
-        rotation: Whether to allow rotation of tokens.
+      bin_algo: The bin packing algorithm to use.
+      pack_algo: The packing algorithm to use.
+      sort_algo: The sorting algorithm to use.
+      rotation: Whether to allow rotation of tokens.
+      bin_algo:str|None|List[str]|Tuple[str]:  (Default value = None)
+      pack_algo:str|None|List[str]|Tuple[str]:  (Default value = None)
+      sort_algo:str|None|List[str]|Tuple[str]:  (Default value = None)
+      rotation:bool | None:  (Default value = None)
 
     Returns:
-        A RectPackLayout instance.
+      : A RectPackLayout instance.
+
     """
     def to_combination_list(value, options_dict):
+        """
+
+        Args:
+          value: 
+          options_dict: 
+
+        Returns:
+
+        """
         options = list(options_dict.keys())
         if isinstance(value, str) and value.lower() != "all":
             return [value]
@@ -147,6 +166,13 @@ def make_rectpack_layouts(bin_algo:str|None|List[str]|Tuple[str] = None,
 def make_constrainted_rectpack_layouts(config: Dict[str, Any]) -> Generator[RectPackLayout, None, None]:
     """Factory function to create a RectPackLayout with all possible configurations
     other than constrained in the given config.
+
+    Args:
+      config: Dict[str: 
+      Any]: 
+
+    Returns:
+
     """
     # Make kw with only relevant keys
     kw = {k:config.get(k) for k in ["bin_algo", "pack_algo", "sort_algo", "rotation"]}
@@ -156,6 +182,13 @@ def make_constrainted_rectpack_layouts(config: Dict[str, Any]) -> Generator[Rect
 def make_constrainted_best_layout(config: Dict[str, Any]) -> BestLayout:
     """Factory function to create a BestLayout with all possible configurations
     other than constrained in the given config.
+
+    Args:
+      config: Dict[str: 
+      Any]: 
+
+    Returns:
+
     """
     return BestLayout(config, make_constrainted_rectpack_layouts(config))
 
@@ -164,6 +197,12 @@ def make_default_rectpack_layouts(rotation:bool=True) -> Generator[RectPackLayou
     Currently, uses GuillotineBssfSas, MaxRectsBssf, SkylineMwf for in-bin packing,
     AREA for sorting,
     and all possible bin-packing algorithms.
+
+    Args:
+      rotation:bool:  (Default value = True)
+
+    Returns:
+
     """
     config = {
         "pack_algo": ["GuillotineBssfSas", "MaxRectsBssf", "SkylineMwf"],
@@ -177,12 +216,28 @@ def make_default_best_layout(config) -> BestLayout:
     Currently, uses GuillotineBssfSas, MaxRectsBssf, SkylineMwf for in-bin packing,
     AREA for sorting,
     and all possible bin-packing algorithms.
+
+    Args:
+      config: 
+
+    Returns:
+
     """
     rotation = config.get("rotation", True)
     return BestLayout(config,make_default_rectpack_layouts(rotation=rotation))
 
 def report_failure(placement, token_sizes, placed, page_sizes):
-    """Prints a report of the tokens that could not be placed."""
+    """Prints a report of the tokens that could not be placed.
+
+    Args:
+      placement: 
+      token_sizes: 
+      placed: 
+      page_sizes: 
+
+    Returns:
+
+    """
     print("Failed to place the following tokens:")
     
 

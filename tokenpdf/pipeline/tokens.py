@@ -12,6 +12,7 @@ class TokenMaker:
         self.tqdm = vtqdm(self.verbose)
 
     def make_tokens(self):
+        """ """
         # Make tokens from config
         tokens_data = self.loader.generate_tokens(self.config)
         tokens = [make_token(token_config, self.loader)
@@ -19,5 +20,6 @@ class TokenMaker:
         return tokens
     
     def make_maps(self):
+        """ """
         maps_data = self.loader.generate_maps(self.config)
         return maps_data

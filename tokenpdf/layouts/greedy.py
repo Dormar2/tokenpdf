@@ -12,7 +12,20 @@ class GreedyLayout(Layout):
         page_sizes: Generator[Tuple[float, float], None, None],
         verbose: bool = False
     ) -> List[List[Tuple[int, float, float, float, float]]]:
-        """Implements a greedy algorithm for arranging tokens on pages."""
+        """Implements a greedy algorithm for arranging tokens on pages.
+
+        Args:
+          token_sizes: List[Tuple[float: 
+          float]]: 
+          page_sizes: Generator[Tuple[float: 
+          float]: 
+          None: 
+          None]: 
+          verbose: bool:  (Default value = False)
+
+        Returns:
+
+        """
         if not page_sizes:
             raise ValueError("At least one page size must be provided.")
 

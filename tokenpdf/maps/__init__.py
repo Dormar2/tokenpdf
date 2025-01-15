@@ -3,6 +3,14 @@ from .mapper import Rectangle, Result, KnownPagesMapper, Mapper
 from .map import Map
 
 def make_mapper(config):
+    """
+
+    Args:
+      config: 
+
+    Returns:
+
+    """
     mapper_type = str(config.get("mapper", "simple")).lower()
     if mapper_type == "simple":
         return SimpleMapper(config)

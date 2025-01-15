@@ -29,14 +29,27 @@ class CanvasPage:
         """Draws an image on the page, possibly with image optimization.
 
         Args:
-            x: X-coordinate in mm.
-            y: Y-coordinate in mm.
-            width: Width of the image in mm.
-            height: Height of the image in mm.
-            image_path: Path to the image file.
-            mask: Optional mask for the image.
-            flip: Tuple of (horizontal, vertical) flip flags.
-            rotate: Rotation angle in radians.
+          x: X-coordinate in mm.
+          y: Y-coordinate in mm.
+          width: Width of the image in mm.
+          height: Height of the image in mm.
+          image_path: Path to the image file.
+          mask: Optional mask for the image.
+          flip: Tuple of (horizontal, vertical) flip flags.
+          rotate: Rotation angle in radians.
+          x: float: 
+          y: float: 
+          width: float: 
+          height: float: 
+          image_path: str: 
+          mask: Any:  (Default value = None)
+          flip: Tuple[bool: 
+          bool]:  (Default value = (False)
+          False): 
+          rotate: float:  (Default value = 0)
+
+        Returns:
+
         """
         goaldpmm = self.optimize_images_for_dpmm
         optquality = self.optimize_images_quality
@@ -69,14 +82,27 @@ class CanvasPage:
         """Draws an image on the page.
 
         Args:
-            x: X-coordinate in mm.
-            y: Y-coordinate in mm.
-            width: Width of the image in mm.
-            height: Height of the image in mm.
-            image_path: Path to the image file.
-            mask: Optional mask for the image.
-            flip: Tuple of (horizontal, vertical) flip flags.
-            rotate: Rotation angle in radians.
+          x: X-coordinate in mm.
+          y: Y-coordinate in mm.
+          width: Width of the image in mm.
+          height: Height of the image in mm.
+          image_path: Path to the image file.
+          mask: Optional mask for the image.
+          flip: Tuple of (horizontal, vertical) flip flags.
+          rotate: Rotation angle in radians.
+          x: float: 
+          y: float: 
+          width: float: 
+          height: float: 
+          image_path: str: 
+          mask: Any:  (Default value = None)
+          flip: Tuple[bool: 
+          bool]:  (Default value = (False)
+          False): 
+          rotate: float:  (Default value = 0)
+
+        Returns:
+
         """
         pass
 
@@ -85,12 +111,21 @@ class CanvasPage:
         """Draws text on the page.
 
         Args:
-            x: X-coordinate in mm.
-            y: Y-coordinate in mm.
-            text: The text content to draw.
-            font: Font name.
-            size: Font size in points.
-            rotate: Rotation angle in radians.
+          x: X-coordinate in mm.
+          y: Y-coordinate in mm.
+          text: The text content to draw.
+          font: Font name.
+          size: Font size in points.
+          rotate: Rotation angle in radians.
+          x: float: 
+          y: float: 
+          text: str: 
+          font: str:  (Default value = "Helvetica")
+          size: int:  (Default value = 12)
+          rotate: float:  (Default value = 0)
+
+        Returns:
+
         """
         pass
 
@@ -99,11 +134,19 @@ class CanvasPage:
         """Draws a circle on the page.
 
         Args:
-            x: X-coordinate of the center in mm.
-            y: Y-coordinate of the center in mm.
-            radius: Radius of the circle in mm.
-            stroke: Whether to stroke the circle.
-            fill: Whether to fill the circle.
+          x: X-coordinate of the center in mm.
+          y: Y-coordinate of the center in mm.
+          radius: Radius of the circle in mm.
+          stroke: Whether to stroke the circle.
+          fill: Whether to fill the circle.
+          x: float: 
+          y: float: 
+          radius: float: 
+          stroke: bool:  (Default value = True)
+          fill: bool:  (Default value = False)
+
+        Returns:
+
         """
         pass
 
@@ -113,10 +156,24 @@ class CanvasPage:
         """Draws a line on the page.
 
         Args:
-            x1: X-coordinate of the starting point in mm.
-            y1: Y-coordinate of the starting point in mm.
-            x2: X-coordinate of the ending point in mm.
-            y2: Y-coordinate of the ending point in mm.
+          x1: X-coordinate of the starting point in mm.
+          y1: Y-coordinate of the starting point in mm.
+          x2: X-coordinate of the ending point in mm.
+          y2: Y-coordinate of the ending point in mm.
+          x1: float: 
+          y1: float: 
+          x2: float: 
+          y2: float: 
+          color: Tuple[int: 
+          int: 
+          int]:  (Default value = (0)
+          0: 
+          0): 
+          thickness: float:  (Default value = 1)
+          style: str:  (Default value = "solid")
+
+        Returns:
+
         """
         pass
 
@@ -126,12 +183,27 @@ class CanvasPage:
         """Draws a rectangle on the page.
 
         Args:
-            x: X-coordinate of the top-left corner in mm.
-            y: Y-coordinate of the top-left corner in mm.
-            width: Width of the rectangle in mm.
-            height: Height of the rectangle in mm.
-            stroke: Whether to stroke the rectangle.
-            fill: Whether to fill the rectangle.
+          x: X-coordinate of the top-left corner in mm.
+          y: Y-coordinate of the top-left corner in mm.
+          width: Width of the rectangle in mm.
+          height: Height of the rectangle in mm.
+          stroke: Whether to stroke the rectangle.
+          fill: Whether to fill the rectangle.
+          x: float: 
+          y: float: 
+          width: float: 
+          height: float: 
+          stroke: int:  (Default value = 1)
+          fill: int:  (Default value = 0)
+          color: Tuple[int: 
+          int: 
+          int]:  (Default value = (0)
+          0: 
+          0): 
+          style: str:  (Default value = "solid")
+
+        Returns:
+
         """
         pass
 
@@ -155,24 +227,39 @@ class Canvas:
         """Creates a new page in the canvas.
 
         Args:
-            size: Tuple of (width, height) in mm.
-            background: Optional path to a background image.
+          size: Tuple of (width, height) in mm.
+          background: Optional path to a background image.
+          size: Tuple[float: 
+          float]: 
+          background: str:  (Default value = None)
 
         Returns:
-            An instance of CanvasPage.
+          : An instance of CanvasPage.
+
         """
         pass
 
     
     def save(self, verbose: bool = False):
-        """Finalizes and saves the canvas to the output file."""
+        """Finalizes and saves the canvas to the output file.
+
+        Args:
+          verbose: bool:  (Default value = False)
+
+        Returns:
+
+        """
         pass
 
     def add_cleanup(self, file_path: str):
         """Adds a file to the cleanup list.
 
         Args:
-            file_path: Path to the file to cleanup.
+          file_path: Path to the file to cleanup.
+          file_path: str: 
+
+        Returns:
+
         """
         self.files_cleanup.append(Path(file_path))
 
