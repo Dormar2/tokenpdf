@@ -1,12 +1,16 @@
 from pathlib import Path
+from turtle import width
 from typing import Dict, Any, List
 import tempfile
+from matplotlib.pylab import f
 import requests
 import mimetypes
 import numpy as np
 from tokenpdf.utils.config import merge_configs
+from tokenpdf.utils.image import get_file_dimensions, complete_size
 from tokenpdf.utils.verbose import vprint, vtqdm
 from tokenpdf.systems import registry as system_registry
+from tokenpdf.maps import Map
 import tokenpdf.utils.config as config
 
 class ResourceLoader:
@@ -117,6 +121,38 @@ class ResourceLoader:
 
 
         return tokens
+    
+    def generate_maps(self, config: Dict[str, Any] = None, verbose=None) -> Dict[str, Any]:
+        """
+        Generates map specifications based on the configuration.
+        :param config: The configuration dictionary.
+        :return: A dictionary of generated maps.
+        """
+        config = config if config is not None else self._cfg
+        if config is None:
+            return []
+        if verbose == None:
+            verbose = config.get("verbose", False)
+        seed = config.get("seed", None)
+        rng = np.random.RandomState(seed)
+        system = self._systems.get_system(config.get("system", "D&D 5e"))
+        print = vprint(verbose)
+        print("Generating map specifications")
+        maps = []
+        gmap = config.get("map", {}).copy()
+        for map in config.get("maps", {}).values():
+            res = merge_configs(gmap, map)
+           
+            
+            maps.append(Map(res, self, system))
+        print(f"Generated {len(maps)} maps")
+        return maps
+
+            
+            
+
+            
+        
 
     @property
     def resources(self):
@@ -178,7 +214,8 @@ class ResourceLoader:
         self._local_files.append(temp_file.name)
         res = _download(url, temp_file.name, 
                         self._cfg.get("__config_files", []),
-                        allow_rename=True)
+                        allow_rename=True,
+                        verbose=verbose)
         print(f"Resource saved to {res}")
         return res
 
@@ -194,7 +231,8 @@ class ResourceLoader:
 
 def _download(url: str, file_path: str, 
               config_files: List[str] = (),
-              allow_rename: bool = True) -> Path:
+              allow_rename: bool = True,
+              verbose:bool = False) -> str:
     """
     Downloads a file from a URL to a local path.
 
@@ -203,10 +241,10 @@ def _download(url: str, file_path: str,
     """
     # Check if the URL is a local file
     if url.lower().startswith("file://"):
-        return find_local_path(Path(url[7:]), config_files)
+        return find_local_path(Path(url[7:]), config_files, verbose)
     elif (any(url.lower().startswith(s) for s in [".", "/", "~"])
           or url.lower()[1:3] == ":\\"):
-        return find_local_path(Path(url), config_files)
+        return find_local_path(Path(url), config_files, verbose)
     
 
     path = Path(file_path)
@@ -241,19 +279,24 @@ def random_ratio(mu, sigma, rng):
     return rng.lognormal(np.log(mu), sigma)
 
 
-def find_local_path(path:Path, config_files:List[str]) -> Path:
+def find_local_path(path:Path, config_files:List[str], verbose:bool = False) -> Path:
     """
     Finds a local path based on a configuration file.
     :param path: The path to find.
     :param config_files: The list of configuration files.
     :return: The local path to the file.
     """
+    print = vprint(verbose)
+    print(f"Looking for local path {path}")
     if path.is_absolute():
+        print(f"Using absolute path {path}")
         return path
     for config_file in config_files:
         config_path = Path(config_file).parent
         local_path = config_path / path
+        print(f"Trying {local_path}")
         if local_path.is_file():
+            print(f"Found! At {local_path}")
             return local_path
     raise FileNotFoundError(f"File {path} not found in any configuration directory")        
 

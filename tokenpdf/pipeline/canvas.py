@@ -1,11 +1,18 @@
+from multiprocessing import context
+from httpx import delete
 import numpy as np
 from papersize import parse_papersize
 from tokenpdf.canvas import make_canvas
 from tokenpdf.utils.verbose import vprint, vtqdm
-
+from PIL.Image import Image
+import PIL
+from typing import Tuple, Generator
+from contextlib import contextmanager
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 class CanvasManager:
-    """Manages canvas creation and token placement."""
+    """Manages canvas creation and token and map placement."""
 
     def __init__(self, config, loader, verbose):
         self.verbose = verbose
@@ -16,8 +23,11 @@ class CanvasManager:
         self.config = config
         self.page_size, self.margin, self.page_size_margin = self._calculate_page_size()
 
-    def place_tokens(self, tokens, layout):
+    def place_tokens(self, tokens, layout, maps, mapper):
         """Places tokens on the canvas."""
+        # add map tokens
+        tokens = tokens.copy()
+        tokens.extend(self.make_map_tokens(maps, mapper))
         verbose = self.verbose
         tqdm = vtqdm(verbose)
         print = vprint(verbose)
@@ -27,10 +37,11 @@ class CanvasManager:
         token_margins = [margin for _, margin in sizesm]
 
         print("Arranging tokens in pages")
-        
+        print(f"Page size: {self.page_size_margin}")
+        print(f"Token sizes: {sizes_with_margins}")
         pages = layout.arrange(sizes_with_margins, self._gen_page_size(), verbose=verbose)
         canvas_pages = self._make_pages(pages)
-        for placement_page, canvas_page in zip(tqdm(pages, desc="Drawing pages"),
+        for placement_page, canvas_page in zip(tqdm(pages, desc="Drawing token pages"),
                                                 canvas_pages):
             for tindex, x, y, width, height in tqdm(placement_page, desc="Drawing tokens", leave=False):
                 orig_size = sizes[tindex]
@@ -42,10 +53,39 @@ class CanvasManager:
                 xm, ym = np.array([x, y]) + self.margin + tmargins
                 token, t_cfg = tokens[tindex]
                 token.draw(canvas_page, t_cfg, self.loader, (xm, ym, *orig_size))
+    
+    def make_map_tokens(self, maps, mapper):
+        """Places maps on the canvas."""
+        verbose = self.verbose
+        tqdm = vtqdm(verbose)
+        print = vprint(verbose)
+        fragments = []
+        page_gen = self._gen_page_size()
+        for map in tqdm(maps, desc="Making map fragments"):
+            in_page_size = map.size_on_page
+            overlap_margin = map.overlap_margin
+            #placements = mapper.map(in_page_size, page_gen, overlap_margin, verbose=verbose)
+            placements = mapper.map(map, page_gen, overlap_margin, verbose=verbose)
+            # Ignore the placements themselves, just use 
+            # the fragments. The mapper returned a possible
+            # placement, so we know it can be placed.
+            #num_pages = max(p for p, *_ in placements) + 1
+            fragments.extend([(f, f.map.config) for _, f, _ in placements])
+            
+            #pages = self._make_pages(range(num_pages))
+            
+            #for page_num, img_roi, page_roi in placements:
+            #    page = pages[page_num]
+            #    page_roi_with_margins = (*(page_roi[:2] + self.margin), *page_roi[2:])
+            #    map.draw(page, page_roi_with_margins, img_roi)
+        return fragments    
+            
+
 
     def save(self):
         """Saves the canvas to a file."""
         self.canvas.save(verbose=self.verbose)
+        self.canvas.cleanup()
 
     def _calculate_page_size(self):
         config = self.config
@@ -72,3 +112,4 @@ class CanvasManager:
     def _add_margin(self, size, token_cfg):
         margin = token_cfg.get("margin", 0) * np.array(size)
         return size + 2 * margin, margin
+  
