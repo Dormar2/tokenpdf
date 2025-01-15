@@ -5,15 +5,15 @@ from tokenpdf.utils.general import ResettableGenerator, consume
 from tokenpdf.utils.graph import largest_connected_component
 
 class Layout(ABC):
-    """
-    Abstract base class for layouts.
+    """Abstract base class for layouts.
     Defines the interface for all layout algorithms.
     """
 
     def __init__(self, config: Dict[str, Any]):
-        """
-        Initializes the layout with the given configuration.
-        :param config: Dictionary of configuration options for the layout.
+        """Initializes the layout with the given configuration.
+
+        Args:
+            config: Dictionary of configuration options for the layout.
         """
         self.config = config
 
@@ -24,20 +24,24 @@ class Layout(ABC):
         page_sizes: Generator[Tuple[float, float], None, None],
         verbose: bool = False
     ) -> List[List[Tuple[int, float, float, float, float]]]:
-        """
-        Arranges tokens on pages based on their sizes and page constraints.
-        :param token_sizes: A list of tuples representing token widths and heights in mm.
-        :param page_sizes: A generator of tuples representing page widths and heights in mm.
-        :param verbose: Whether to print progress information.
-        :return: A list of pages, where each page is a list of tuples containing the token index
-            and the placement rectangle (x, y, width, height)
+        """Arranges tokens on pages based on their sizes and page constraints.
+
+        Args:
+            token_sizes: A list of tuples representing token widths and
+                heights in mm.
+            page_sizes: A generator of tuples representing page widths
+                and heights in mm.
+            verbose: Whether to print progress information.
+
+        Returns:
+            A list of pages, where each page is a list of tuples
+            containing the token index and the placement rectangle (x,
+            y, width, height)
         """
         pass
 
     def sort_output(self, output: List[List[Tuple[int, float, float, float, float]]]) -> List[List[Tuple[int, float, float, float, float]]]:
-        """
-        Sorts the pages of the output to resemble the order of the tokens as best we can
-        """
+        """Sorts the pages of the output to resemble the order of the tokens as best we can"""
         # We'll use lexicographic order the token sequences in each page
         def _page_key(page):
             return sorted([t[0] for t in page])
@@ -48,16 +52,13 @@ class Layout(ABC):
         return self.__class__.__name__
 
 class LayoutImpossibleError(Exception):
-    """
-    Exception raised when a single page layout algorithm is unable to arrange the given tokens on the given page.
-    """
+    """Exception raised when a single page layout algorithm is unable to arrange the given tokens on the given page."""
     pass
 
 
 
 class KnownPagesLayout(Layout):
-    """
-    A subclassable layout that arranges tokens on a generator of page sizes,
+    """A subclassable layout that arranges tokens on a generator of page sizes,
     using an overrided function that arranges tokens on a concrete list of page sizes.
     Uses an iterative "double pages number" approach to find the best number of pages.
     """
@@ -67,13 +68,19 @@ class KnownPagesLayout(Layout):
         page_sizes: Generator[Tuple[float, float], None, None],
         verbose: bool = False
     ) -> List[List[Tuple[int, float, float, float, float]]]:
-        """
-        Arranges tokens on pages based on their sizes and page constraints.
-        :param token_sizes: A list of tuples representing token widths and heights in mm.
-        :param page_sizes: A generator of tuples representing page widths and heights in mm.
-        :param verbose: Whether to print progress information.
-        :return: A list of pages, where each page is a list of tuples containing the token index
-            and the placement rectangle (x, y, width, height)
+        """Arranges tokens on pages based on their sizes and page constraints.
+
+        Args:
+            token_sizes: A list of tuples representing token widths and
+                heights in mm.
+            page_sizes: A generator of tuples representing page widths
+                and heights in mm.
+            verbose: Whether to print progress information.
+
+        Returns:
+            A list of pages, where each page is a list of tuples
+            containing the token index and the placement rectangle (x,
+            y, width, height)
         """
         pages = [next(page_sizes)]
         while len(pages) <= len(token_sizes): # Safety check
@@ -102,28 +109,33 @@ class KnownPagesLayout(Layout):
         page_sizes: List[Tuple[float, float]],
         verbose: bool = False
     ) -> List[List[Tuple[int, float, float, float, float]]]:
-        """
-        Arranges tokens on pages based on their sizes and page constraints.
+        """Arranges tokens on pages based on their sizes and page constraints.
         Raises LayoutImpossibleError if the tokens can't be arranged on the given pages.
-        :param token_sizes: A list of tuples representing token widths and heights in mm.
-        :param page_sizes: A list of tuples representing page widths and heights in mm.
-        :param verbose: Whether to print progress information.
-        :return: A list of pages, where each page is a list of tuples containing the token index
-            and the placement rectangle (x, y, width, height)
+
+        Args:
+            token_sizes: A list of tuples representing token widths and
+                heights in mm.
+            page_sizes: A list of tuples representing page widths and
+                heights in mm.
+            verbose: Whether to print progress information.
+
+        Returns:
+            A list of pages, where each page is a list of tuples
+            containing the token index and the placement rectangle (x,
+            y, width, height)
         """
         pass
 
 
 class BestLayout(Layout):
-    """
-    Runs multiple Layout and chooses the best result
-    """
+    """Runs multiple Layout and chooses the best result"""
 
     def __init__(self, config: Dict[str, Any], layouts: List[Layout]):
-        """
-        Initializes the layout with the given configuration.
-        :param config: Dictionary of configuration options for the layout.
-        :param layouts: List of layouts to run
+        """Initializes the layout with the given configuration.
+
+        Args:
+            config: Dictionary of configuration options for the layout.
+            layouts: List of layouts to run
         """
         super().__init__(config)
         
@@ -143,13 +155,19 @@ class BestLayout(Layout):
         page_sizes: Generator[Tuple[float, float], None, None],
         verbose: bool = False
     ) -> List[List[Tuple[int, float, float, float, float]]]:
-        """
-        Arranges tokens on pages based on their sizes and page constraints.
-        :param token_sizes: A list of tuples representing token widths and heights in mm.
-        :param page_sizes: A generator of tuples representing page widths and heights in mm.
-        :param verbose: Whether to print progress information.
-        :return: A list of pages, where each page is a list of tuples containing the token index
-            and the placement rectangle (x, y, width, height)
+        """Arranges tokens on pages based on their sizes and page constraints.
+
+        Args:
+            token_sizes: A list of tuples representing token widths and
+                heights in mm.
+            page_sizes: A generator of tuples representing page widths
+                and heights in mm.
+            verbose: Whether to print progress information.
+
+        Returns:
+            A list of pages, where each page is a list of tuples
+            containing the token index and the placement rectangle (x,
+            y, width, height)
         """
         if not token_sizes:
             return []
@@ -176,11 +194,14 @@ class BestLayout(Layout):
         result2: List[List[Tuple[int, float, float, float, float]]],
         layout1: Layout, layout2: Layout
     ) -> List[List[Tuple[int, float, float, float, float]]]:
-        """
-        Compares two results and returns the best one.
-        :param result1: The first result.
-        :param result2: The second result.
-        :return: The best result.
+        """Compares two results and returns the best one.
+
+        Args:
+            result1: The first result.
+            result2: The second result.
+
+        Returns:
+            The best result.
         """
         if result1 is None:
             print(f"{layout1} failed, using {layout2}")
@@ -208,8 +229,7 @@ class BestLayout(Layout):
 
     
 def _largest_contiguous_areas(result: List[List[Tuple[int, float, float, float, float]]]) -> float:
-    """
-    Returns the largest contiguous area in the result.
+    """Returns the largest contiguous area in the result.
     Sums per-page contiguous areas.
     """
     EPS = 1e-4

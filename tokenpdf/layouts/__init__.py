@@ -5,10 +5,13 @@ from .rectpack import RectPackLayout, make_default_best_layout, make_constrainte
 
 
 def make_layout(config: dict) -> Layout:
-    """
-    Factory function to create a layout object based on the given configuration.
-    :param config: The configuration dictionary for the layout.
-    :return: A layout object.
+    """Factory function to create a layout object based on the given configuration.
+
+    Args:
+        config: The configuration dictionary for the layout.
+
+    Returns:
+        A layout object.
     """
     layout_type = str(config.get("layout", "rectpack_best")).lower()
     if layout_type in ["greedy", ""]:

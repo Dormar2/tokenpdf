@@ -168,12 +168,16 @@ class ReportLabCanvas(Canvas):
 
 def apply_image_filters(image_path, mask=None, flip: Tuple[bool, bool] = (False, False), 
                         rotate: float = 0, **kw) -> NamedTemporaryFile:
-    """
-    Apply filters to an image.
-    :param mask: The mask to apply to the image.
-    :param flip: A tuple of booleans indicating whether to flip the image horizontally and vertically.
-    :param rotate: The angle to rotate the image.
-    :return: A context to hold the file on disk
+    """Apply filters to an image.
+
+    Args:
+        mask: The mask to apply to the image.
+        flip: A tuple of booleans indicating whether to flip the image
+            horizontally and vertically.
+        rotate: The angle to rotate the image.
+
+    Returns:
+        A context to hold the file on disk
     """
     
     if mask is None and flip == (False, False) and rotate == 0:

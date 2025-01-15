@@ -1,10 +1,13 @@
 from .canvas import Canvas, CanvasPage
 from pathlib import Path
 def make_canvas(config):
-    """
-    Factory function to create a canvas based on the configuration.
-    :param config: Dictionary of configuration options for the canvas.
-    :return: A new canvas instance.
+    """Factory function to create a canvas based on the configuration.
+
+    Args:
+        config: Dictionary of configuration options for the canvas.
+
+    Returns:
+        A new canvas instance.
     """
     TYPE_DEFAULTS = {'pdf':'reportlab', '':'reportlab'}
     if "output_format" not in config and "canvas" not in config:

@@ -24,8 +24,7 @@ class Mapper(abc.ABC):
         pass
 
 class KnownPagesMapper(Mapper):
-    """
-    Maps a map to a set of known page sizes,
+    """Maps a map to a set of known page sizes,
     similar to the KnownPagesLayout layout.
     """
     
@@ -50,8 +49,6 @@ class KnownPagesMapper(Mapper):
         
     @abc.abstractmethod 
     def map_on_pages(self, map: Image, page_sizes: Sequence[Tuple[float, float]], verbose: bool = False) -> Result:
-        """
-        Maps a map to a set of known page sizes.
-        """
+        """Maps a map to a set of known page sizes."""
         pass
     

@@ -14,9 +14,7 @@ from tokenpdf.maps import Map
 import tokenpdf.utils.config as config
 
 class ResourceLoader:
-    """
-    A class responsible for loading resources, including configuration files.
-    """
+    """A class responsible for loading resources, including configuration files."""
 
     def __init__(self):
         self._local_files = []
@@ -25,24 +23,31 @@ class ResourceLoader:
         self._systems = system_registry
 
     def load_config(self, file_path: str) -> Dict[str, Any]:
-        """
-        Loads a single configuration file in JSON, YAML, or TOML format.
+        """Loads a single configuration file in JSON, YAML, or TOML format.
 
-        :param file_path: The path to the configuration file.
-        :return: A dictionary representing the configuration.
-        :raises ValueError: If the file format is unsupported
-        :raises FileNotFoundError: If the file does not exist
+        Args:
+            file_path: The path to the configuration file.
+
+        Returns:
+            A dictionary representing the configuration.
+
+        Raises:
+            ValueError: If the file format is unsupported
+            FileNotFoundError: If the file does not exist
         """
         c = config.load_with_imports(file_path)
         self._cfg = c
         return c
 
     def load_configs(self, file_paths: List[str]) -> Dict[str, Any]:
-        """
-        Loads multiple configuration files and unifies them.
+        """Loads multiple configuration files and unifies them.
 
-        :param file_paths: A list of paths to the configuration files.
-        :return: A unified dictionary representing the combined configuration.
+        Args:
+            file_paths: A list of paths to the configuration files.
+
+        Returns:
+            A unified dictionary representing the combined
+            configuration.
         """
         unified_config = {}
         for file_path in file_paths:
@@ -54,10 +59,13 @@ class ResourceLoader:
         return unified_config
     
     def generate_tokens(self, config: Dict[str, Any] = None, verbose=None) -> Dict[str, Any]:
-        """
-        Generates token specifications based on the configuration.
-        :param config: The configuration dictionary.
-        :return: A dictionary of generated tokens.
+        """Generates token specifications based on the configuration.
+
+        Args:
+            config: The configuration dictionary.
+
+        Returns:
+            A dictionary of generated tokens.
         """
         config = config if config is not None else self._cfg
         if config is None:
@@ -123,10 +131,13 @@ class ResourceLoader:
         return tokens
     
     def generate_maps(self, config: Dict[str, Any] = None, verbose=None) -> Dict[str, Any]:
-        """
-        Generates map specifications based on the configuration.
-        :param config: The configuration dictionary.
-        :return: A dictionary of generated maps.
+        """Generates map specifications based on the configuration.
+
+        Args:
+            config: The configuration dictionary.
+
+        Returns:
+            A dictionary of generated maps.
         """
         config = config if config is not None else self._cfg
         if config is None:
@@ -161,12 +172,15 @@ class ResourceLoader:
         return self._resources
 
     def load_resources(self, config:Dict[str,Any] = None, verbose=None) -> Dict[str, Any]:
-        """
-        Load resources specified in the configuration.
-        :param config: The configuration dictionary.
-        :return: A dictionary of loaded resources.
-                Structure is similar to configuration,
-                except that paths are replaced with loaded resources.
+        """Load resources specified in the configuration.
+
+        Args:
+            config: The configuration dictionary.
+
+        Returns:
+            A dictionary of loaded resources. Structure is similar to
+            configuration, except that paths are replaced with loaded
+            resources.
         """
         config = config if config is not None else self._cfg
         if config is None:
@@ -202,10 +216,13 @@ class ResourceLoader:
         return self._resources[key]
     
     def load_resource(self, url: str, verbose=False) -> str:
-        """
-        Saves a local copy of the resource and returns the path.
-        :param url: The URL of the resource.
-        :return: The local path to the resource.
+        """Saves a local copy of the resource and returns the path.
+
+        Args:
+            url: The URL of the resource.
+
+        Returns:
+            The local path to the resource.
         """
         # Download the resource from the URL
         print = vprint(verbose)
@@ -220,9 +237,7 @@ class ResourceLoader:
         return res
 
     def cleanup(self):
-        """
-        Cleans up temporary files created during resource loading.
-        """
+        """Cleans up temporary files created during resource loading."""
         for file_path in self._local_files:
             if Path(file_path).is_file():
                 Path(file_path).unlink()
@@ -233,11 +248,11 @@ def _download(url: str, file_path: str,
               config_files: List[str] = (),
               allow_rename: bool = True,
               verbose:bool = False) -> str:
-    """
-    Downloads a file from a URL to a local path.
+    """Downloads a file from a URL to a local path.
 
-    :param url: The URL of the file to download.
-    :param file_path: The local path to save the downloaded file.
+    Args:
+        url: The URL of the file to download.
+        file_path: The local path to save the downloaded file.
     """
     # Check if the URL is a local file
     if url.lower().startswith("file://"):
@@ -269,22 +284,28 @@ def _download(url: str, file_path: str,
 
 
 def random_ratio(mu, sigma, rng):
-    """
-    Generates a random ratio, log-normally distributed around a mean.
-    :param mu: The mean of the distribution.
-    :param sigma: The standard deviation of the distribution.
-    :param rng: The random number generator.
-    :return: A random ratio.
+    """Generates a random ratio, log-normally distributed around a mean.
+
+    Args:
+        mu: The mean of the distribution.
+        sigma: The standard deviation of the distribution.
+        rng: The random number generator.
+
+    Returns:
+        A random ratio.
     """
     return rng.lognormal(np.log(mu), sigma)
 
 
 def find_local_path(path:Path, config_files:List[str], verbose:bool = False) -> Path:
-    """
-    Finds a local path based on a configuration file.
-    :param path: The path to find.
-    :param config_files: The list of configuration files.
-    :return: The local path to the file.
+    """Finds a local path based on a configuration file.
+
+    Args:
+        path: The path to find.
+        config_files: The list of configuration files.
+
+    Returns:
+        The local path to the file.
     """
     print = vprint(verbose)
     print(f"Looking for local path {path}")

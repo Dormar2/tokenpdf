@@ -1,6 +1,11 @@
 # Project-specific files
-tokens_output.pdf
 *.old
+*.pdf
+
+# sphinx outputs
+docs/build/
+docs/source/*.rst
+
 
 # For now
 .vscode/ 

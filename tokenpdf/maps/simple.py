@@ -3,7 +3,7 @@ import numpy as np
 from .map import Map, MapFragment
 
 class SimpleMapper(Mapper):
-    """ Simple mapper, assumes page sizes are all the same """
+    """Simple mapper, assumes page sizes are all the same"""
     def __init__(self, config):
         super().__init__(config)
 

@@ -3,8 +3,7 @@ from pathlib import Path
 from typing import Tuple, Generator
 
 class ResettableGenerator:
-    """
-    A generator that can be reset to its initial state,
+    """A generator that can be reset to its initial state,
     saves all values it has generated so far.
     """
     def __init__(self, gen, reset_on_stop=True):
@@ -39,8 +38,9 @@ class ResettableGenerator:
 
 
 def consume(generator, n):
-    """ Consume up to n items from a generator and return them in a list.
-        If no items are left, raises StopIteration. """
+    """Consume up to n items from a generator and return them in a list.
+       If no items are left, raises StopIteration.
+    """
     res = [None] * n
     length = 0
     for i in range(n):
@@ -56,8 +56,7 @@ def consume(generator, n):
 
 
 class Rename:
-    """
-    A context manager that renames a file when entering and renames it back when exiting.
+    """A context manager that renames a file when entering and renames it back when exiting.
     Useful for "inplace" processing of a file, while making sure that if the processing fails,
     the original file is not lost.
     """

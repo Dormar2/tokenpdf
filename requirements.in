@@ -9,3 +9,6 @@ networkx
 tqdm
 rectpack
 pikepdf
+sphinx
+sphinx-rtd-theme
+myst-parser

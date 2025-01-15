@@ -4,9 +4,7 @@ from .layout import Layout
 from tokenpdf.utils.verbose import vprint, vtqdm
 
 class GreedyLayout(Layout):
-    """
-    Greedy layout algorithm for arranging tokens on pages.
-    """
+    """Greedy layout algorithm for arranging tokens on pages."""
 
     def arrange(
         self, 
@@ -14,9 +12,7 @@ class GreedyLayout(Layout):
         page_sizes: Generator[Tuple[float, float], None, None],
         verbose: bool = False
     ) -> List[List[Tuple[int, float, float, float, float]]]:
-        """
-        Implements a greedy algorithm for arranging tokens on pages.
-        """
+        """Implements a greedy algorithm for arranging tokens on pages."""
         if not page_sizes:
             raise ValueError("At least one page size must be provided.")
 

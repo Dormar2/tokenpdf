@@ -6,12 +6,14 @@ import yaml
 import configparser
 
 def merge_configs(base: Dict[str, Any], override: Dict[str, Any], *overrides) -> Dict[str, Any]:
-    """
-    Merges two configuration dictionaries.
+    """Merges two configuration dictionaries.
 
-    :param base: The base configuration dictionary.
-    :param override: The overriding configuration dictionary.
-    :return: A unified configuration dictionary.
+    Args:
+        base: The base configuration dictionary.
+        override: The overriding configuration dictionary.
+
+    Returns:
+        A unified configuration dictionary.
     """
     if overrides:
         return merge_configs(merge_configs(base, override), *overrides)
@@ -28,11 +30,14 @@ def format_supported(path: Path | str) -> bool:
     return suffix in [".json", ".toml", ".yaml", ".yml", ".ini", ".cfg"]
 
 def load_any(path: Path | str) -> Dict[str, Any]:
-    """
-    Loads a configuration in various formats.
+    """Loads a configuration in various formats.
     Supported: JSON, TOML, YAML, INI (ConfigParser).
-    :param path: The path to the configuration file.
-    :return: A dictionary of configuration options.
+
+    Args:
+        path: The path to the configuration file.
+
+    Returns:
+        A dictionary of configuration options.
     """
     path = Path(path)
     if not path.exists():
@@ -52,8 +57,7 @@ def load_any(path: Path | str) -> Dict[str, Any]:
     raise ValueError(f"Unsupported configuration file format: {path.suffix}")
 
 def load_with_imports(path: Path | str) -> Dict[str, Any]:
-    """
-    Loads a configuration file with support for importing other configuration files.
+    """Loads a configuration file with support for importing other configuration files.
     Supported file Formats: JSON, TOML, YAML, INI (ConfigParser).
 
     Syntax for importing is one of the following:
@@ -63,7 +67,7 @@ def load_with_imports(path: Path | str) -> Dict[str, Any]:
     - As a value, use any key name, and "@import: <file path>" as the value.
         This will replace the value with the imported file.
 
-    References files can be in different formats. 
+    References files can be in different formats.
     The paths are assumed relative to the configuration file being loaded, unless they are absolute.
     To use paths relative to cwd, have the path start with "./".
 
@@ -102,9 +106,7 @@ def load_with_imports(path: Path | str) -> Dict[str, Any]:
             
                     
 def get_data_folder() -> Path:
-    """
-    Returns the path to the data folder.
-    """
+    """Returns the path to the data folder."""
     return Path(__file__).parent.parent / "data"
 
     

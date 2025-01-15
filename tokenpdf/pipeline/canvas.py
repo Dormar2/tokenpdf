@@ -100,8 +100,9 @@ class CanvasManager:
 
 
     def _gen_page_size(self):
-        """ Generates pages (page sizes) as needed.
-            Currently a constant stream of the same size """
+        """Generates pages (page sizes) as needed.
+           Currently a constant stream of the same size
+        """
         while True:
             yield self.page_size_margin
 

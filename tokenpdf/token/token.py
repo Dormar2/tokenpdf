@@ -4,8 +4,7 @@ from tokenpdf.utils.config import merge_configs
 
 
 class Token(ABC):
-    """
-    Abstract base class for tokens.
+    """Abstract base class for tokens.
     Defines the interface for all token types.
     """
 
@@ -14,37 +13,40 @@ class Token(ABC):
     @classmethod
     @abstractmethod
     def supported_types(cls) -> Dict[str, Dict[str, Any]]:
-        """
-        Returns a dictionary mapping supported types to their expected configuration values
+        """Returns a dictionary mapping supported types to their expected configuration values
         and default values. Example:
         #TODO
         """
         pass
 
     def apply_defaults(self, config: Dict[str, Any], resources: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Applies default values to the configuration dictionary after loading resources
-        :param config: The configuration dictionary for the token instance.
-        :param resources: The resources loaded for the token instance (e.g. fonts, images).
+        """Applies default values to the configuration dictionary after loading resources
+
+        Args:
+            config: The configuration dictionary for the token instance.
+            resources: The resources loaded for the token instance (e.g.
+                fonts, images).
         """
         return config
 
     @abstractmethod
     def area(self, config, resources) -> Tuple[float, float]:
-        """
-        Calculates the required area in real-world units (mm)
+        """Calculates the required area in real-world units (mm)
         Should be based on the configuration of the token instance.
 
-        :param config: The configuration dictionary for the token instance.
-        :param resources: The resources loaded for the token instance (e.g. fonts, images).
+        Args:
+            config: The configuration dictionary for the token instance.
+            resources: The resources loaded for the token instance (e.g.
+                fonts, images).
         """
         pass
 
     def draw(self, canvas, config, resources, rect):
-        """
-        Draws the token on the specified rectangle area.
-        :param canvas: The drawing surface (PDF canvas, for example).
-        :param rect: The rectangle (x, y, width, height) defining the area.
+        """Draws the token on the specified rectangle area.
+
+        Args:
+            canvas: The drawing surface (PDF canvas, for example).
+            rect: The rectangle (x, y, width, height) defining the area.
         """
         if config.get("rect_border_thickness") is not None:
             canvas.rect(*rect, stroke=config.get("rect_border_thickness", None),
@@ -61,17 +63,16 @@ class Token(ABC):
 
 
 class TokenRegistry:
-    """
-    A class responsible for managing token types.
-    """
+    """A class responsible for managing token types."""
 
     def __init__(self):
         self._token_types = {}
 
     def register(self, cls):
-        """
-        Registers a token class.
-        :param cls: The token class to register.
+        """Registers a token class.
+
+        Args:
+            cls: The token class to register.
         """
         supported_types = cls.supported_types()
         for token_type, config in supported_types.items():
@@ -81,11 +82,15 @@ class TokenRegistry:
             self._token_types[ttype] = (cls, config)
     
     def make(self, config, resources) -> Tuple[Token, Dict[str, Any], Dict[str, Any]]:
-        """
-        Creates a new token instance of the specified type.
-        :param config: The configuration dictionary for the token instance.
-        :param resources: The resources loaded for the token instance (e.g. fonts, images).
-        :return: A new token instance.
+        """Creates a new token instance of the specified type.
+
+        Args:
+            config: The configuration dictionary for the token instance.
+            resources: The resources loaded for the token instance (e.g.
+                fonts, images).
+
+        Returns:
+            A new token instance.
         """
         token_type = config.get("type", "Circle").lower()
         if token_type not in self._token_types:
