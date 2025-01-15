@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import List, Tuple, Dict, Any, Generator
 
-from tokenpdf.utils.general import ResettableGenerator
+from tokenpdf.utils.general import ResettableGenerator, consume
 from tokenpdf.utils.graph import largest_connected_component
+
 class Layout(ABC):
     """
     Abstract base class for layouts.
@@ -32,6 +33,16 @@ class Layout(ABC):
             and the placement rectangle (x, y, width, height)
         """
         pass
+
+    def sort_output(self, output: List[List[Tuple[int, float, float, float, float]]]) -> List[List[Tuple[int, float, float, float, float]]]:
+        """
+        Sorts the pages of the output to resemble the order of the tokens as best we can
+        """
+        # We'll use lexicographic order the token sequences in each page
+        def _page_key(page):
+            return sorted([t[0] for t in page])
+            
+        return sorted(output, key=_page_key)
 
     def __str__(self):
         return self.__class__.__name__
@@ -65,17 +76,19 @@ class KnownPagesLayout(Layout):
             and the placement rectangle (x, y, width, height)
         """
         pages = [next(page_sizes)]
-        while len(pages) < len(token_sizes): # Safety check
+        while len(pages) <= len(token_sizes): # Safety check
             try:
+                if verbose:
+                    print(f"Trying {len(pages)} pages")
                 result = self.arrange_on_pages(token_sizes, pages, verbose)
                 # Remove unneeded pages
                 while not result[-1]:
                     result.pop()
-                return result
+                return self.sort_output(result)
             except LayoutImpossibleError as e:
                 try:
                     # Try to add new pages
-                    pages.extend(consume(page_sizes, len(pages)))
+                    pages.extend(consume(page_sizes, max(1,min(len(pages), len(token_sizes) - len(pages)))))
                 except StopIteration:
                     # Can't even add a single page
                     raise e
@@ -219,18 +232,4 @@ def _largest_contiguous_areas(result: List[List[Tuple[int, float, float, float, 
 
 
 
-def consume(generator, n):
-    """ Consume up to n items from a generator and return them in a list.
-        If no items are left, raises StopIteration. """
-    res = [None] * n
-    length = 0
-    for i in range(n):
-        try:
-            res[i] = next(generator)
-            length = i + 1
-        except StopIteration:
-            if i == 0:
-                raise
-            break
-    return res[:length]
     

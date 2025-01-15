@@ -1,3 +1,4 @@
+from multiprocessing import context
 from typing import Any, Dict, Tuple
 from pathlib import Path
 from reportlab.pdfgen import canvas as reportlab_canvas
@@ -13,8 +14,9 @@ import contextlib
 import numpy as np
 
 class ReportLabCanvasPage(CanvasPage):
-    def __init__(self, pdf_canvas, width: float, height: float, background: str = None):
-        self.pdf_canvas = pdf_canvas
+    def __init__(self, canvas, width: float, height: float, background: str = None):
+        super().__init__(canvas)
+        self.pdf_canvas = canvas.pdf
         self.width = width
         self.height = height
         self.background = background
@@ -26,18 +28,20 @@ class ReportLabCanvasPage(CanvasPage):
     def _execute_commands(self, verbose: bool = False):
         """Execute all drawing commands on the canvas."""
         tqdm = vtqdm(verbose)
-        for command in tqdm(self.commands, desc="Drawing page", leave=False):
+        for command in tqdm(self.commands, desc="Executing Page Commands", leave=False):
             cmd_type = command[0]
             if cmd_type == "image":
                 _, x, y, width, height, image_path, mask, flip, rotate = command
                 
-                with apply_image_filters(image_path, mask, flip, rotate) as img_path:
+                with apply_image_filters(image_path, mask, flip, rotate, **self.pil_save_kw) as img_path:
+                    self.canvas.add_cleanup(img_path.name)
                     self.pdf_canvas.drawImage(img_path.name, x * mm, (self.height - y - height) * mm, 
                                             width * mm, height * mm, mask='auto')
             elif cmd_type == "text":
-                _, x, y, text, font, size = command
+                _, x, y, text, font, size, rotate = command
                 self.pdf_canvas.setFont(font, size)
-                self.pdf_canvas.drawString(x * mm, (self.height - y) * mm, text)
+                with self._rotation(rotate, (x, y)) as ((xr, yr),):
+                    self.pdf_canvas.drawString(xr * mm, (self.height - yr) * mm, text)
             elif cmd_type == "circle":
                 _, x, y, radius, stroke, fill = command
                 self.pdf_canvas.circle(x * mm, (self.height - y) * mm, radius * mm, 
@@ -54,12 +58,12 @@ class ReportLabCanvasPage(CanvasPage):
                                         stroke=stroke, fill=fill)
                 
 
-    def image(self, x: float, y: float, width: float, height: float, image_path: str, mask: Any = None,
+    def _image(self, x: float, y: float, width: float, height: float, image_path: str, mask: Any = None,
               flip: Tuple[bool, bool] = (False, False), rotate: float = 0):
         self.commands.append(("image", x, y, width, height, image_path, mask, flip, rotate))
 
-    def text(self, x: float, y: float, text: str, font: str = "Helvetica", size: int = 12):
-        self.commands.append(("text", x, y, text, font, size))
+    def text(self, x: float, y: float, text: str, font: str = "Helvetica", size: int = 12, rotate: float = 0):
+        self.commands.append(("text", x, y, text, font, size, rotate))
 
     def circle(self, x: float, y: float, radius: float, stroke: bool = True, fill: bool = False):
         self.commands.append(("circle", x, y, radius, stroke, fill))
@@ -122,6 +126,22 @@ class ReportLabCanvasPage(CanvasPage):
         self.pdf_canvas.setLineWidth(thickness)
         yield
         self.pdf_canvas.setLineWidth(orig_thickness)
+    @contextlib.contextmanager
+    def _rotation(self, angle: float, *args) -> contextlib.contextmanager:
+        """Rotate the canvas for the context."""
+        if angle == 0:
+            yield args
+            return
+        self.pdf_canvas.rotate(angle)
+        # args is a sequence of x,y pairs, we need to find out where they went
+        # after the rotation
+        new_args = []
+        for x, y in args:
+            x, y = x * np.cos(angle) - y * np.sin(angle), x * np.sin(angle) + y * np.cos(angle)
+            new_args.append((x, y))
+        yield new_args
+        self.pdf_canvas.rotate(-angle)
+
 
 class ReportLabCanvas(Canvas):
     def __init__(self, config: Dict[str, Any], file_path: str | None = None):
@@ -130,7 +150,7 @@ class ReportLabCanvas(Canvas):
         self.pages = []  # Track pages
 
     def create_page(self, size: Tuple[float, float], background: str = None) -> CanvasPage:
-        page = ReportLabCanvasPage(self.pdf, size[0], size[1], background)
+        page = ReportLabCanvasPage(self, size[0], size[1], background)
         self.pages.append(page)
         return page
 
@@ -146,7 +166,8 @@ class ReportLabCanvas(Canvas):
 
 
 
-def apply_image_filters(image_path, mask=None, flip: Tuple[bool, bool] = (False, False), rotate: float = 0):
+def apply_image_filters(image_path, mask=None, flip: Tuple[bool, bool] = (False, False), 
+                        rotate: float = 0, **kw) -> NamedTemporaryFile:
     """
     Apply filters to an image.
     :param mask: The mask to apply to the image.
@@ -177,7 +198,7 @@ def apply_image_filters(image_path, mask=None, flip: Tuple[bool, bool] = (False,
     path = Path(context.name)
     path.parent.mkdir(parents=True, exist_ok=True)
     #context.close()  # Close the file so that the image can be saved to it
-    image.save(path)
+    image.save(path, **kw)
     return context
 
 

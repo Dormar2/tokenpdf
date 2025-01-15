@@ -4,7 +4,8 @@ import rectpack
 from .layout import KnownPagesLayout, BestLayout, LayoutImpossibleError
 import math
 from collections import defaultdict
-
+import numpy as np
+import tabulate
 
 PACKING_BIN_NAMES = {n:getattr(rectpack.PackingBin, n) for n in rectpack.PackingBin}
 PACKING_ALGO_NAMES = {
@@ -75,23 +76,31 @@ class RectPackLayout(KnownPagesLayout):
 
         # Add the pages to the packer
         for page_width, page_height in page_sizes:
-            packer.add_bin(int(math.floor(page_width)), int(math.floor(page_height)))
+            packer.add_bin(int(math.ceil(page_width)), int(math.ceil(page_height)))
         # Add the tokens to the packer
         for i, (width, height) in enumerate(token_sizes):
-            packer.add_rect(width, height, rid=i)
+            packer.add_rect(int(math.floor(width)), int(math.floor(height)), rid=i)
         # Pack the tokens onto the page
         packer.pack()
         # Get the placement rectangles
         placement = packer.rect_list()
-        # Make sure we placed all tokens
-        if len(placement) != len(token_sizes):
-            raise LayoutImpossibleError("Not all tokens could be placed.")
+        placed = np.zeros(len(token_sizes), dtype=bool)
         # Convert the placement rectangles to the format expected by the caller
         pages = defaultdict(list)
         for bid, x, y, width, height, rid in placement:
+            placed[int(rid)] = True
             pages[int(bid)].append((int(rid), x, y, width, height))
-        return [pages.get(i, [])
+        
+        result = [pages.get(i, [])
                 for i in range(len(page_sizes))]
+        
+        # Make sure we placed all tokens
+        if len(placement) != len(token_sizes):
+            report_failure(result, token_sizes, placed, page_sizes)
+            raise LayoutImpossibleError("Not all tokens could be placed.")
+        
+        
+        return result
 
 
 def make_rectpack_layouts(bin_algo:str|None|List[str]|Tuple[str] = None,
@@ -167,3 +176,34 @@ def make_default_best_layout(config) -> BestLayout:
     """
     rotation = config.get("rotation", True)
     return BestLayout(config,make_default_rectpack_layouts(rotation=rotation))
+
+def report_failure(placement, token_sizes, placed, page_sizes):
+    """
+    Prints a report of the tokens that could not be placed.
+    """
+    print("Failed to place the following tokens:")
+    
+
+    table = []
+    for bid, page in enumerate(placement):
+        for rid, x, y, width, height in page:
+            table.append(
+                {
+                    "Token": rid,
+                    "Size": f"{width}x{height}",
+                    "Position": f"({x}, {y})",
+                    "Page": f"{bid} ({page_sizes[bid][0]}x{page_sizes[bid][1]})"
+                }
+            )
+    for i, (width, height) in enumerate(token_sizes):
+        if not placed[i]:
+            table.append(
+                {
+                    "Token": i,
+                    "Size": f"{width:.2f}x{height:.2f}",
+                    "Position": "X",
+                    "Page": "X"
+                }
+            )
+    print(tabulate.tabulate(table, headers="keys"))
+

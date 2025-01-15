@@ -1,6 +1,7 @@
 from .tokens import TokenMaker
 from .canvas import CanvasManager
 from .layout import LayoutManager
+from .post import FilePostProcess
 from tokenpdf.resources import ResourceLoader
 from tokenpdf.utils.verbose import vtqdm, vprint
 
@@ -30,16 +31,20 @@ class WorkflowManager:
         print("Loading resources...")
         self.loader.load_resources()
         print(f"Loaded {len(self.loader.resources)} resources")
+        
+        print("Creating layout...")
+        layout, mapper = self.layout.make_layout()
         print("Generating token objects...")
+        maps = self.tokens.make_maps()
         tokens = self.tokens.make_tokens()
         print(f"Generated {len(tokens)} token objects")
-        print("Creating layout...")
-        layout = self.layout.make_layout()
 
         print(f"Placing {len(tokens)} tokens")
-        self.canvas.place_tokens(tokens, layout)
+        self.canvas.place_tokens(tokens, layout, maps, mapper)
 
         print(f"Saving output to {self.config['output_file']}")
         self.canvas.save()
+        print(f"Post-processing {self.config['output_file']}")
+        FilePostProcess.process(self.config['output_file'], self.config, self.loader)
         print("Done, cleaning up...")
         self.loader.cleanup()

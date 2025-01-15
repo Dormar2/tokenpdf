@@ -8,3 +8,4 @@ requests
 networkx
 tqdm
 rectpack
+pikepdf

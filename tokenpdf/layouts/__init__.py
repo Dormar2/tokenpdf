@@ -1,4 +1,4 @@
-from .layout import Layout, BestLayout
+from .layout import Layout, BestLayout, LayoutImpossibleError
 from .greedy import GreedyLayout
 from .rectpack import RectPackLayout, make_default_best_layout, make_constrainted_best_layout
 
@@ -30,4 +30,4 @@ def make_layout(config: dict) -> Layout:
     else:
         raise ValueError(f"Unsupported layout type: {layout_type}")
 
-__all__ = ["make_layout", "Layout", "GreedyLayout"]
+__all__ = ["make_layout", "Layout", "GreedyLayout", "RectPackLayout", "BestLayout", "LayoutImpossibleError"]
