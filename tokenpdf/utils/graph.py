@@ -6,15 +6,12 @@ def largest_connected_component(
         is_connected: Callable[[Any, Any], bool]
 ) -> List[Any]:
     """Finds the largest connected component in a graph of items.
+    The graph is constructed here, so this function is not suitable
+    for large graphs.
 
     Args:
       items: A sequence of items to be connected.
-      is_connected: A function that returns True if two items are
-    connected.
-      items: Sequence[Any]: 
-      is_connected: Callable[[Any: 
-      Any]: 
-      bool]: 
+      is_connected: A function that returns True if two items are connected.
 
     Returns:
       : A list of items in the largest connected component.

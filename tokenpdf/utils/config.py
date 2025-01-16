@@ -6,15 +6,15 @@ import yaml
 import configparser
 
 def merge_configs(base: Dict[str, Any], override: Dict[str, Any], *overrides) -> Dict[str, Any]:
-    """Merges two configuration dictionaries.
+    """Merges two or more configuration dictionaries.
+    Does not modify the original dictionaries.
+    Merge is done recursively for nested dictionaries.
+    Lists are NOT merged, the override list replaces the base list.
 
     Args:
       base: The base configuration dictionary.
-      override: The overriding configuration dictionary.
-      base: Dict[str: 
-      Any]: 
-      override: Dict[str: 
-      *overrides: 
+      override: The dictionary to merge into the base.
+      *overrides: Additional dictionaries to merge.
 
     Returns:
       : A unified configuration dictionary.
@@ -32,12 +32,9 @@ def merge_configs(base: Dict[str, Any], override: Dict[str, Any], *overrides) ->
 
 def format_supported(path: Path | str) -> bool:
     """
-
-    Args:
-      path: Path | str: 
-
-    Returns:
-
+    If the file format is supported for loading configuration files.
+    Check is based on file suffix and not content.
+    Currently supported: JSON, TOML, YAML, INI (ConfigParser).
     """
     suffix = Path(path).suffix.lower()
     return suffix in [".json", ".toml", ".yaml", ".yml", ".ini", ".cfg"]
@@ -48,7 +45,6 @@ def load_any(path: Path | str) -> Dict[str, Any]:
 
     Args:
       path: The path to the configuration file.
-      path: Path | str: 
 
     Returns:
       : A dictionary of configuration options.
@@ -97,14 +93,6 @@ def load_with_imports(path: Path | str) -> Dict[str, Any]:
     path = Path(path)
 
     def get_path(p : Path) -> Path:
-        """
-
-        Args:
-          p : Path: 
-
-        Returns:
-
-        """
         if p.is_absolute():
             return p
         if p.parts[0] == ".":
@@ -115,12 +103,7 @@ def load_with_imports(path: Path | str) -> Dict[str, Any]:
 
     def _load_with_imports(current: Dict[str, Any]) -> Dict[str, Any]:
         """
-
-        Args:
-          current: Dict[str: 
-          Any]: 
-
-        Returns:
+        Recursively load a configuration dictionary with support for imports.
 
         """
         if isinstance(current, dict):
@@ -144,7 +127,7 @@ def load_with_imports(path: Path | str) -> Dict[str, Any]:
             
                     
 def get_data_folder() -> Path:
-    """Returns the path to the data folder."""
+    """Returns the path to the package data folder."""
     return Path(__file__).parent.parent / "data"
 
     

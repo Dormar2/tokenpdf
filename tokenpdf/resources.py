@@ -1,6 +1,7 @@
+import itertools
 from pathlib import Path
 from turtle import width
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Sequence
 import tempfile
 from matplotlib.pylab import f
 import requests
@@ -15,7 +16,7 @@ import tokenpdf.utils.config as config
 
 class ResourceLoader:
     """A class responsible for loading resources, including configuration files."""
-
+    CROSS_PRODUCT_KEYS = ["page_size"]
     def __init__(self):
         self._local_files = []
         self._cfg = None
@@ -41,8 +42,10 @@ class ResourceLoader:
         self._cfg = c
         return c
 
-    def load_configs(self, file_paths: List[str]) -> Dict[str, Any]:
+    def load_configs(self, file_paths: List[str]) -> Dict[str, Any] | Sequence[Dict[str, Any]]:
         """Loads multiple configuration files and unifies them.
+            Possibly generates multiple "configuration tasks"
+            if some specific keys have multiple values.
 
         Args:
           file_paths: A list of paths to the configuration files.
@@ -60,7 +63,25 @@ class ResourceLoader:
         if file_paths:
             unified_config["__config_files"] = file_paths
         self._cfg = unified_config
-        return unified_config
+        # Generate multiple configuration tasks if needed
+        uc = unified_config
+        cross_product_values ={
+            k: (uc.get(k) if isinstance(uc.get(k), list|tuple) else [uc.get(k)])
+            for k in self.CROSS_PRODUCT_KEYS
+        }
+        products = list(itertools.product(*cross_product_values.values()))
+        print(products, cross_product_values)
+        if len(products) == 1:
+            return unified_config
+        elif not products:
+            raise ValueError("No configuration tasks generated")
+        else:
+            
+            config_tasks = [
+                dict(unified_config, **dict(zip(cross_product_values.keys(), p)))
+                for p in products
+            ]
+            return config_tasks
     
     def generate_tokens(self, config: Dict[str, Any] = None, verbose=None) -> Dict[str, Any]:
         """Generates token specifications based on the configuration.

@@ -71,13 +71,31 @@ def consume(generator, n):
 
 class Rename:
     """A context manager that renames a file when entering and renames it back when exiting.
+
     Useful for "inplace" processing of a file, while making sure that if the processing fails,
     the original file is not lost.
 
     Args:
+        path (str): The original file path.
+        to (str): The new file path.
+        delete_on_cancel (bool): If True, the new file will be deleted if cancel() is called.
 
-    Returns:
+    Examples:
+        ```python
+        with Rename("file.txt", "file.txt.tmp"):
+            process_file("file.txt.tmp")
+            # If process_file fails, the original file is still intact.
 
+        with Rename("file.txt", "file.txt.tmp", delete_on_cancel=True) as r:
+            process_file("file.txt.tmp")
+            # process_file succeeded, the original file is now "file.txt.tmp"
+            # it is safe to delete the new file.
+            r.cancel()
+
+        with Rename("file.txt", "file.txt.tmp") as r:
+            process_file("file.txt.tmp")
+            r.cancel() # Cancel the renaming, leaving the original file intact as "file.txt.tmp"
+        ```
     """
     def __init__(self, path : Path, to : Path, delete_on_cancel=False):
         self.path = path
@@ -90,7 +108,10 @@ class Rename:
         return self
     
     def cancel(self):
-        """ """
+        """ 
+        Disables the renaming-back of the file at __exit__.
+        If delete_on_cancel is True, the new file is deleted here.
+        """
         self._disable = True
         if self.delete_on_cancel and self.to.exists():
             self.to.unlink()
