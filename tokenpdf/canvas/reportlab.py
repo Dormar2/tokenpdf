@@ -311,12 +311,8 @@ def apply_image_filters(image_path, mask=None, flip: Tuple[bool, bool] = (False,
       flip: A tuple of booleans indicating whether to flip the image
     horizontally and vertically.
       rotate: The angle to rotate the image.
-      image_path: 
-      flip: Tuple[bool: 
-      bool]:  (Default value = (False)
-      False): 
-      rotate: float:  (Default value = 0)
-      **kw: 
+      image_path: The path to the image file or a PIL Image object.
+      **kw: Additional keyword arguments to pass to the PIL save method.
 
     Returns:
       : A context to hold the file on disk

@@ -12,3 +12,4 @@ pikepdf
 sphinx
 sphinx-rtd-theme
 myst-parser
+sphinx-autobuild

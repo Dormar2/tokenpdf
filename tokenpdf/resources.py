@@ -103,7 +103,10 @@ class ResourceLoader:
             verbose = config.get("verbose", False)
         seed = config.get("seed", None)
         rng = np.random.RandomState(seed)
-        system = self._systems.get_system(config.get("system", "D&D 5e"))
+        if "system_url" in config:
+            system = self._systems.load_system(config["system_url"])
+        else:
+            system = self._systems.get_system(config.get("system", "D&D 5e"))
         print = vprint(verbose)
         print("Generating token specifications")
         tokens = []

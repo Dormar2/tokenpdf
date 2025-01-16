@@ -5,6 +5,10 @@
 # sphinx outputs
 docs/build/
 docs/source/*.rst
+!docs/source/index.rst
+!docs/source/changelog.rst
+!docs/source/config.rst
+!docs/source/readme.rst
 
 
 # For now

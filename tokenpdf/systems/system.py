@@ -120,6 +120,14 @@ class RPGSystemRegistry:
 
         """
         self.systems[system.name] = system
+        return system
+
+    def load_system(self, path:Path) -> RPGSystem:
+        if not path.exists():
+            raise FileNotFoundError(f"System file {path} not found.")
+        if not config.format_supported(path):
+            raise ValueError(f"Unsupported file format for system file {path}")
+        return self.add_system(RPGSystem(config.load_any(path)))
     
     def get_system(self, name):
         """
@@ -164,8 +172,6 @@ class RPGSystemRegistry:
         data_folder = config.get_data_folder() / "systems"
         for files in data_folder.rglob("*.*"):
             if config.format_supported(files):
-                system_config = config.load_any(files)
-                system = RPGSystem(system_config)
-                self.add_system(system)
+                self.load_system(files)
 
 

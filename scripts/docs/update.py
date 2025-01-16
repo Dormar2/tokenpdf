@@ -3,8 +3,9 @@ import os
 
 def main():
     # Create .rst from sphinx
-    os.system("sphinx-apidoc -o docs/source/ ./tokenpdf/")
-    os.system("sphinx-build -b html docs/source/ docs/build/")
+    os.system("sphinx-apidoc -o docs/source/ tokenpdf/")
+    # Fresh build the docs html
+    os.system("sphinx-build -E -b html docs/source/ docs/build/")
 
 
 
