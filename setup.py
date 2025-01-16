@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name="tokenpdf",  
-    version="0.2",  
-    description="Generate printable PDF files for tabletop RPG tokens",
+    version="0.2.1",  
+    description="Generate printable PDF files for tabletop RPG tokens and maps",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",  
     url="https://github.com/Dormar2/tokenpdf",  
