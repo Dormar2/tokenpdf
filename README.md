@@ -1,7 +1,3 @@
-Here’s a revised approach for a "Getting Started" manual in `readme.md`, structured to guide users step-by-step from simple to advanced usage:
-
----
-
 # TokenPDF: Generate Printable RPG Tokens with Ease
 
 **TokenPDF** is a lightweight Python library for creating printable PDF files containing RPG tokens. It simplifies the process of generating tokens for monsters, characters, and other entities in tabletop role-playing games (specifically Dungeons & Dragons and similar games).
@@ -10,6 +6,9 @@ Here’s a revised approach for a "Getting Started" manual in `readme.md`, struc
 *Example of generated tokens.*
 
 ---
+## Changelog
+
+See the [Changelog](CHANGELOG.md) for details on recent changes.
 
 ## Getting Started
 
