@@ -2,10 +2,8 @@ from functools import lru_cache
 from re import I
 from PIL import Image
 from pathlib import Path
-from typing import Tuple, Generator
+from typing import Tuple
 import numpy as np
-from tempfile import NamedTemporaryFile
-from contextlib import contextmanager
 
 
 def get_file_dimensions(file_path: str | Image.Image) -> Tuple[int, int]:
@@ -140,6 +138,8 @@ def join_mask_channel(image: Image.Image, mask: np.ndarray,
     if image.mode == "RGBA" and blend:
         image_alpha = np.array(image)[:, :, 3]
         mask_alpha = to_float_np_image(np.array(mask))
+        if allow_resize and mask_alpha.shape != image_alpha.shape:
+            mask_alpha = np.asarray(Image.fromarray(to_uint8_np_image(mask_alpha)).resize(image.size, Image.NEAREST))
         mask = image_alpha * mask_alpha
     
     mask = to_uint8_np_image(np.array(mask))
@@ -190,54 +190,6 @@ def to_image(obj: Image.Image | Path | str | np.ndarray) -> Image.Image:
         return Image.fromarray(obj)
     else:
         raise ValueError("Unsupported object type for conversion to image.")
-
-  
-
-def TemporaryCropImageFile(image : Image.Image | Path | str,
-                           roi: Tuple[int, int, int, int], 
-                           delete: bool = True, suffix: str = ".png", **kw) -> NamedTemporaryFile:
-    """Crops an image and saves it to a NamedTemporaryFile.
-
-
-    Args:
-        image : Image.Image | Path | str: The image to crop. See to_image for supported types.
-        roi: Tuple[int, int, int, int]: The region of interest as a tuple of (x, y, width, height).
-        delete: bool: If True, the temporary file is deleted on context exit.
-        suffix: str: The suffix of the temporary file.
-        **kw: Additional keyword arguments for PIL.Image.save.
-
-    Returns:
-        : A NamedTemporaryFile with the cropped image saved to file.name.
-
-    """
-    if isinstance(image, Path) or isinstance(image, str):
-        image = Image.open(image)
-    roi = np.array(roi)
-    roi_pil = (*roi[:2],*(roi[:2]+roi[2:]))
-    cropped = image.crop(roi_pil)
-    return TemporaryFilepathForImage(cropped, delete=delete, suffix=suffix, **kw)
-
-@contextmanager
-def TemporaryFilepathForImage(image : Image.Image | Path | str, delete: bool = True, suffix: str = ".png", **kw) -> Generator[NamedTemporaryFile, None, None]:
-    """Temporary file for images objects.
-    Even if the image is already a file, it is saved to a temporary file to ensure that the file is deleted.
-
-    Args:
-      image : Image.Image | Path | str: The image, see to_image for supported types.
-      delete: bool: If True, the temporary file is deleted on context exit.
-      suffix: str: The suffix of the temporary file.
-      **kw: Additional keyword arguments for PIL.Image.save.
-
-    Returns:
-        : A NamedTemporaryFile with the image saved to file.name.
-
-    """
-    if isinstance(image, Path) or isinstance(image, str):
-        image = Image.open(image)
-    with NamedTemporaryFile(suffix=suffix, delete=delete, delete_on_close=True) as tmp:
-        tmp.close()
-        image.save(tmp.name, **kw)
-        yield tmp
 
 
 def add_grid(img : Image.Image, grid: Tuple[int,int], color: str = "black",

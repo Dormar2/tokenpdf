@@ -9,8 +9,10 @@ import numpy as np
 from tokenpdf.utils.config import merge_configs
 from tokenpdf.utils.image import get_file_dimensions, complete_size
 from tokenpdf.utils.verbose import vprint, vtqdm
+from tokenpdf.utils.io import download_file
 from tokenpdf.systems import registry as system_registry
 from tokenpdf.maps import Map
+from .image import TokenImage
 import tokenpdf.utils.config as config
 
 class ResourceLoader:
@@ -255,8 +257,8 @@ class ResourceLoader:
     def __getitem__(self, key):
         return self._resources[key]
     
-    def load_resource(self, url: str, verbose=False) -> str:
-        """Saves a local copy of the resource and returns the path.
+    def load_resource(self, url: str, verbose=False) -> TokenImage:
+        """Saves a local copy of the resource (if needed) and returns the path.
 
         Args:
           url: The URL of the resource.
@@ -267,18 +269,25 @@ class ResourceLoader:
           : The local path to the resource.
 
         """
-        # Download the resource from the URL
-        print = vprint(verbose)
-        print(f"Downloading resource from {url}")
-        temp_file = tempfile.NamedTemporaryFile(delete=False)
-        self._local_files.append(temp_file.name)
-        res = _download(url, temp_file.name, 
-                        self._cfg.get("__config_files", []),
-                        allow_rename=True,
-                        verbose=verbose)
-        print(f"Resource saved to {res}")
-        return res
+        config_files = self._cfg.get("__config_files", [])
+        optimize_images_quality = self._cfg.get("optimize_image_quality", 0)
+        pil_save_kw = {"optimize": True,
+                            "format": "PNG"}
+        if optimize_images_quality:
+            pil_save_kw["quality"] = optimize_images_quality
 
+
+        # Check if the URL is actually a local file
+        if url.lower().startswith("file://"):
+            path_or_url = find_local_path(Path(url[7:]), config_files, verbose)
+        elif (any(url.lower().startswith(s) for s in [".", "/", "~"])
+            or url.lower()[1:3] == ":\\"):
+            path_or_url = find_local_path(Path(url), config_files, verbose)
+        else:
+            path_or_url = url
+        # Download the resource from the URL
+        return TokenImage(path_or_url, None, default_suffix=".png", **pil_save_kw)
+    
     def cleanup(self):
         """Cleans up temporary files created during resource loading."""
         for file_path in self._local_files:
@@ -305,29 +314,9 @@ def _download(url: str, file_path: str,
     Returns:
 
     """
-    # Check if the URL is a local file
-    if url.lower().startswith("file://"):
-        return find_local_path(Path(url[7:]), config_files, verbose)
-    elif (any(url.lower().startswith(s) for s in [".", "/", "~"])
-          or url.lower()[1:3] == ":\\"):
-        return find_local_path(Path(url), config_files, verbose)
     
 
-    path = Path(file_path)
-    
-    
-    path.parent.mkdir(parents=True, exist_ok=True)
-    response = requests.get(url)
-    if response.status_code != 200:
-        raise requests.HTTPError(f"Failed to download file from {url} - {response.status_code}")
-    if allow_rename:
-        content_type = response.headers['content-type']
-        extension = mimetypes.guess_extension(content_type, strict=False)
-        if extension:
-            path = path.with_suffix(extension)
-    with open(path, 'wb') as f:
-        f.write(response.content)
-    return path
+    return download_file(url, file_path, allow_rename)
 
             
 

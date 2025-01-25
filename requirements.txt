@@ -38,3 +38,9 @@ tqdm==4.67.1
     # via -r requirements.in
 urllib3==2.3.0
     # via requests
+
+imagesize==1.4.1
+    # via -r requirements.in
+
+platformdirs
+wrapt

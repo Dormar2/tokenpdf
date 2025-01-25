@@ -24,7 +24,7 @@ class SideStandToken(Token):
     def apply_defaults(self, config, resources):
         config = super().apply_defaults(config, resources)
         width, height = config.get("width"), config.get("height")
-        width, height = complete_size(width, -1, *get_file_dimensions(resources[config["image_url"]]), keep_aspect_ratio=config.get("keep_aspect_ratio", True))
+        width, height = complete_size(width, -1, *resources[config["image_url"]].dims, keep_aspect_ratio=config.get("keep_aspect_ratio", True))
         config["width"], config["height"] = width, height
         return config
     
@@ -105,7 +105,7 @@ class TopStandToken(Token):
     @classmethod
     def supported_types(cls):
         """ """
-        return {
+        types = {
             "stand_tops": {
                 "width": None, "height": None, "border_color": "black", "fill_color": "white",
                 "image_url": None, "border_url": None, "keep_aspect_ratio": True,
@@ -115,11 +115,13 @@ class TopStandToken(Token):
                 "fold_lines": False
             }
         }
+        types["standing"] = dict(types["stand_tops"], sides=2)
+        return types
     
     def apply_defaults(self, config, resources):
         config = super().apply_defaults(config, resources)
         width, height = config.get("width"), config.get("height")
-        width, height = complete_size(width, -1, *get_file_dimensions(resources[config["image_url"]]), keep_aspect_ratio=config.get("keep_aspect_ratio", True))
+        width, height = complete_size(width, -1, *resources[config["image_url"]].dims, keep_aspect_ratio=config.get("keep_aspect_ratio", True))
         config["width"], config["height"] = width, height
         return config
     
@@ -138,6 +140,7 @@ class TopStandToken(Token):
         factor = np.array(view.size) / orig_size
         # Reconstruct the inner and outer polygons from the new size
         nw, nh = factor * np.array([config["width"], config["height"]])
+        print(f"Old size: {orig_size}, New size: {nw,nh}, while view size is {view.size}, with angle {view.angle} and factor {factor}")
         inner, outer = self.construct_segments(nw, nh, n)
         # Align all points to the origin of the view (0,0)
         all_points = np.concatenate([inner, outer], axis=0)
@@ -161,6 +164,7 @@ class TopStandToken(Token):
             rview = view.view(*top_left_corner, nw, nh, angle=angle)
             mview = rview.margin_view(config.get("standing_margin", 0), regular=True)
             img = self._load_image(resources, config["image_url"])
+            
             mview.image(0,0, None, None, img)
             # Draw the bounding rect of each image
             #rview.line(0,0, nw, 0, **linekw)

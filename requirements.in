@@ -11,7 +11,10 @@ rectpack
 pikepdf
 tabulate
 PyMuPDF
+imagesize
+platformdirs
 sphinx
 sphinx-rtd-theme
 myst-parser
 sphinx-autobuild
+wrapt

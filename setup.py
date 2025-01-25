@@ -27,9 +27,11 @@ setup(
         "pyyaml",
         "requests",
         "networkx",
+        "platformdirs",
         "tqdm",
+        "wrapt",
         "rectpack",
-
+        "imagesize",
         "pikepdf",
         "tabulate",
         "PyMuPDF"

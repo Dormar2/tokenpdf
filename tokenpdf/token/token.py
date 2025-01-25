@@ -19,8 +19,7 @@ class Token(ABC):
     @abstractmethod
     def supported_types(cls) -> Dict[str, Dict[str, Any]]:
         """Returns a dictionary mapping supported types to their expected configuration values
-        and default values. Example:
-        #TODO
+        and default values. Example: @see SideStandToken.supported_types()
 
         Args:
 

@@ -35,7 +35,7 @@ class CircleToken(Token):
         config = super().apply_defaults(config, resources)
         if config["image_url"] is not None:
             if config.get("radius") is None:
-                dims = get_file_dimensions(resources[config["image_url"]])
+                dims = resources[config["image_url"]].dims
                 config["radius"] = max(*dims) / (2*dpmm(config))
         else:
             if config.get("radius") is None:
@@ -91,17 +91,19 @@ class CircleToken(Token):
         keep_aspect_ratio = config.get("keep_aspect_ratio", True)
         
         if config.get("image_url") is not None:
-            image_url_path = resources[config["image_url"]]
-            oim_width, oim_height = get_file_dimensions(image_url_path)
+            image = resources[config["image_url"]]
+            oim_width, oim_height = image.dims
             im_width, im_height = new_dims(radius, (oim_width, oim_height), keep_aspect_ratio)
             mask = self._get_mask(config, (oim_width, oim_height))
-            view.image(width / 2 - im_width / 2, height / 2 - im_height / 2, im_width, im_height, image_url_path, mask)
+            image = image.add_mask(mask)
+            view.image(width / 2 - im_width / 2, height / 2 - im_height / 2, im_width, im_height, image)
         if config.get("border_url") is not None:
-            border_url_path = resources[config["border_url"]]
-            oim_width, oim_height = get_file_dimensions(border_url_path)
+            border_image = resources[config["border_url"]]
+            oim_width, oim_height = border_image.dims
             im_width, im_height = new_dims(radius, (oim_width, oim_height), keep_aspect_ratio)
             mask = self._get_mask(config, (oim_width, oim_height))
-            view.image(width / 2 - im_width / 2, height / 2 - im_height / 2, im_width, im_height, border_url_path, mask)
+            border_image = border_image.add_mask(mask)
+            view.image(width / 2 - im_width / 2, height / 2 - im_height / 2, im_width, im_height, border_image)
         
     
 

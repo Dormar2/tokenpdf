@@ -1,10 +1,8 @@
 from typing import Tuple, Dict, Any, Sequence
 from pathlib import Path
-from PIL import Image
-import numpy as np
-from tokenpdf.utils.image import TemporaryFilepathForImage, get_file_dimensions
 import logging 
-import cv2
+import numpy as np
+from tokenpdf.image import TokenImage
 
 
 
@@ -19,17 +17,13 @@ class CanvasPage:
         """
         self._page_size = size
         self.canvas = canvas
-        self.optimize_images_quality = canvas.config.get("optimize_image_quality", 0)
         self.optimize_images_for_dpmm = canvas.config.get(
                                     "optimize_images_for_dpmm", 
                                     canvas.config.get("optimize_images_for_dpi", 0) / 25.4)
-        self.pil_save_kw = {"optimize": True,
-                            "format": "PNG"}
-        if self.optimize_images_quality:
-            self.pil_save_kw["quality"] = self.optimize_images_quality
+        
     
     
-    def image(self, x: float, y: float, width: float, height: float, image_path: str, mask: Any = None,
+    def image(self, x: float, y: float, width: float, height: float, image: TokenImage,
               flip: Tuple[bool, bool] = (False, False), rotate: float = 0):
         """Draws an image on the page, possibly with image optimization.
 
@@ -38,51 +32,34 @@ class CanvasPage:
           y: Y-coordinate in mm.
           width: Width of the image in mm.
           height: Height of the image in mm.
-          image_path: Path to the image file.
-          mask: Optional mask for the image.
+          image: The image to draw, possibly with mask.
           flip: Tuple of (horizontal, vertical) flip flags.
-          rotate: Rotation angle in radians.
-          x: float: 
-          y: float: 
-          width: float: 
-          height: float: 
-          image_path: str: 
-          mask: Any:  (Default value = None)
-          flip: Tuple[bool: 
-          bool]:  (Default value = (False)
-          False): 
-          rotate: float:  (Default value = 0)
-
+          rotate: Rotation angle in radians (clockwise)
         Returns:
 
         """
         goaldpmm = self.optimize_images_for_dpmm
-        optquality = self.optimize_images_quality
-        if not optquality and not goaldpmm:
-            return self._image(x, y, width, height, image_path, mask, flip, rotate)
+        
+        if not goaldpmm:
+            return self._image(x, y, width, height, image, flip, rotate)
         scale = 1.0
         if goaldpmm:
-            iw, ih = get_file_dimensions(image_path)
+            iw, ih = image.dims
             if (iw < ih) != (width < height):
                 iw, ih = ih, iw
             cur_dpmm = np.array([iw, ih]) / np.array([width, height])
             cur_dpmm = max(cur_dpmm)
             if cur_dpmm > goaldpmm:
                 scale = goaldpmm / cur_dpmm
-        image = image_path if isinstance(image_path, Image.Image) else Image.open(image_path)
+        
         if scale != 1.0:
-            image = image.resize((int(round(image.width * scale)), int(round(image.height * scale))), Image.LANCZOS)
-        new_mask = mask
-        if scale!=1.0 and mask is not None:
-            new_mask = mask.resize((int(round(mask.width * scale)), int(round(mask.height * scale))), Image.LANCZOS)
-        with TemporaryFilepathForImage(image, delete=False, suffix=".png", **self.pil_save_kw) as tmp:
-            self.canvas.add_cleanup(tmp.name)
-            self._image(x, y, width, height, tmp.name, new_mask, flip, rotate)
+            image = image.resize(scale_x = scale, scale_y = scale)
+        self._image(x, y, width, height, image, flip, rotate)
 
         
 
     
-    def _image(self, x: float, y: float, width: float, height: float, image_path: str, mask: Any = None,
+    def _image(self, x: float, y: float, width: float, height: float, image:TokenImage, mask: Any = None,
                flip: Tuple[bool, bool] = (False, False), rotate: float = 0):
         """Draws an image on the page.
 
@@ -91,20 +68,9 @@ class CanvasPage:
           y: Y-coordinate in mm.
           width: Width of the image in mm.
           height: Height of the image in mm.
-          image_path: Path to the image file.
-          mask: Optional mask for the image.
+          image: The image to draw, possibly with mask.
           flip: Tuple of (horizontal, vertical) flip flags.
-          rotate: Rotation angle in radians.
-          x: float: 
-          y: float: 
-          width: float: 
-          height: float: 
-          image_path: str: 
-          mask: Any:  (Default value = None)
-          flip: Tuple[bool: 
-          bool]:  (Default value = (False)
-          False): 
-          rotate: float:  (Default value = 0)
+          rotate: Rotation angle in radians (clockwise)
 
         Returns:
 
@@ -305,28 +271,33 @@ class CanvasPageView(CanvasPage):
     def size(self) -> Tuple[float, float]:
         return np.array(self.view_rect[2:])
 
-    def image(self, x, y, width, height, image_path, mask = None, flip = (False, False), rotate = 0):
+    def image(self, x, y, width, height, image, flip = (False, False), rotate = 0):
+        """ @see CanvasPage.image """
         if width is None:
             width = self.size[0]
         if height is None:
             height = self.size[1]
         x, y = self._transform(x, y)
-        self.page.image(x, y, width, height, image_path, mask, flip, rotate + self.angle)
+        self.page.image(x, y, width, height, image, flip, rotate + self.angle)
     
     def text(self, x, y, text, font = "Helvetica", size = 12, rotate = 0):
+        """ @see CanvasPage.text """
         x, y = self._transform(x, y)
         self.page.text(x, y, text, font, size, rotate)
     
     def circle(self, x, y, radius, stroke = True, fill = False):
+        """ @see CanvasPage.circle """
         x, y = self._transform(x, y)
         self.page.circle(x, y, radius, stroke, fill)
     
     def line(self, x1, y1, x2, y2, color = (0, 0, 0), thickness = 1, style = "solid"):
+        """ @see CanvasPage.line """
         x1, y1 = self._transform(x1, y1)
         x2, y2 = self._transform(x2, y2)
         self.page.line(x1, y1, x2, y2, color, thickness, style)
     
     def rect(self, x, y, width, height, thickness = 1, fill = 0, color = (0, 0, 0), style = "solid", rotate:float=0):
+        """ @see CanvasPage.rect """
         x, y = self._transform(x, y)
         self.page.rect(x, y, width, height, thickness, fill, color, style, rotate + self.angle)
     

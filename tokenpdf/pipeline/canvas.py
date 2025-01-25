@@ -57,7 +57,8 @@ class CanvasManager:
                 if rotated:
                     # When rotated, the top left corner is shifted to the right by "height"
                     # And the whole thing is rotated around that by 90 degrees
-                    view = page_view.view(x + height, y, height, width, angle=np.pi/2)
+                    # (actually adding width, because that's the original height)
+                    view = page_view.view(x + width, y, height, width, angle=np.pi/2)
                 else:
                     view = page_view.view(x,y, width, height)
                     
@@ -163,4 +164,6 @@ def same_aspect_ratio(size1, size2):
     """ Tests if the two (w,h) pairs have the same aspect ratio."""
     if size1[1] == 0 or size2[1] == 0:
         return size2[1] == 0 and size1[1] == 0
-    return np.isclose(size1[0] / size1[1], size2[0] / size2[1], rtol=1e-2, atol=1e-2)
+    res = np.isclose(size1[0] / size1[1], size2[0] / size2[1], rtol=1e-2, atol=1e-2)
+    
+    return res

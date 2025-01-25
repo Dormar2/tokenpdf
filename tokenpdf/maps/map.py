@@ -1,7 +1,9 @@
 from pydoc import text
 import numpy as np
-from tokenpdf.utils.image import TemporaryCropImageFile, add_grid, complete_size
+from tokenpdf.image import TokenImage
+from tokenpdf.utils.image import add_grid, complete_size
 from tokenpdf.token import Token
+from functools import partial
 from PIL import Image
 
 
@@ -10,7 +12,7 @@ from PIL import Image
 
 class MapFragment(Token):
     """ """
-    def __init__(self, map, rect, misc_margin, system, section=None):
+    def __init__(self, map : TokenImage, rect, misc_margin, system, section=None):
         self.map = map
         self.rect = rect
         self.system = system
@@ -63,7 +65,7 @@ class MapFragment(Token):
         """
         return self.width, self.height
     
-    def draw(self, canvas, config, resources, rect):
+    def draw(self, view, config, resources):
         """
 
         Args:
@@ -78,28 +80,28 @@ class MapFragment(Token):
         factor2 = np.array([*self.map.factor, *self.map.factor])
         rect_in_image = np.array(self.rect)/factor2
         
-        x,y,w,h = rect
-        rotated = (self.width < self.height) != (w < h)
-        misc_margin = self.misc_margin if not rotated else self.misc_margin[::-1]
-        border_margin = self.border_margin if not rotated else self.border_margin[::-1]
-        text_margin = self.text_margin if not rotated else self.text_margin[::-1]
+        
+        misc_margin = self.misc_margin
+        border_margin = self.border_margin
+        text_margin = self.text_margin
+        w,h = view.size
         wp, hp = np.array([w,h]) - misc_margin
-        xp, yp = np.array([x,y]) + border_margin / 2
+        xp, yp = border_margin / 2
 
 
-        with TemporaryCropImageFile(self.map.img, rect_in_image, delete = False) as cropped:    
-            canvas.image(xp, yp, wp, hp, cropped.name, mask = None, rotate = np.pi/2 * int(rotated))
+        with self.map.img.crop(rect_in_image) as cropped:    
+            view.image(xp, yp, wp, hp, cropped)
         font_size = 12
         if text_margin[1] != 0:
             # Write it on the bottom
             xpt = xp
-            ypt = y + h - text_margin[1]/2
-            canvas.text(xpt, ypt, self.text, size = font_size)
+            ypt = h - text_margin[1]/2
+            view.text(xpt, ypt, self.text, size = font_size)
         if text_margin[0] != 0:
             # Write it on the right
-            xpt = x + w - text_margin[0]/2
+            xpt = w - text_margin[0]/2
             ypt = yp
-            canvas.text(xpt, ypt, self.text, rotate = np.pi/2, size = font_size)
+            view.text(xpt, ypt, self.text, rotate = np.pi/2, size = font_size)
             
         
         
@@ -112,8 +114,8 @@ class Map:
         self.system = system
         self.loader = loader
         res = config
-        self.img = Image.open(loader[config["image_url"]])        
-        self.dims = np.array(self.img.size)
+        self.img : TokenImage = loader[config["image_url"]]
+        self.dims = np.array(self.img.dims)
         if "width" in res or "height" in res:
             width = res.get("width", -1)
             height = res.get("height", -1)
@@ -132,7 +134,7 @@ class Map:
         add_grid_ = res.get("add_grid", grid_color is not None)
         if add_grid_:
             grid_color = grid_color if grid_color is not None else "black"
-            self.img = add_grid(self.img, self.size_in_cells, grid_color)
+            self.img = self.img.op(lambda pimg: add_grid(pimg, self.size_in_cells, grid_color))
     @property
     def size_on_page(self):
         """ """

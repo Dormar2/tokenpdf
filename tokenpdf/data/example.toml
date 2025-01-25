@@ -32,9 +32,16 @@ thumbnail_url = "https://picsum.photos/75"
 tokens = [
     #{ type = "standing", size = "medium", count = 3},
     #{ type = "stand_sides", size = "medium", count = 4},
+    { type = "stand_tops", size = "medium", sides=1, count = 1},
     { type = "stand_tops", size = "medium", sides=2, count = 1},
     { type = "stand_tops", size = "medium", sides=3, count = 1},
     { type = "stand_tops", size = "medium", sides=4, count = 1},
+    { type = "stand_sides", size = "medium", sides=1, count = 1},
+    { type = "stand_sides", size = "medium", sides=2, count = 1},
+    { type = "stand_sides", size = "medium", sides=3, count = 1},
+    { type = "stand_sides", size = "medium", sides=4, count = 1},
+    { type = "circle", size = "medium", count = 5},
+    { type = "circle", size = "large", count = 5},
     #{ type = "circle", size = "medium", count = 15}
 ]
 

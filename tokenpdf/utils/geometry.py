@@ -10,7 +10,7 @@ def n_sided_polygon(n, side_length, center=None):
                 If a tuple, the center of the polygon is set to this tuple.
     """
     if n==1:
-        return np.array([[0,0]])
+        return np.array([[0.0,0.0]])
     elif n==0:
         return np.array([])
     

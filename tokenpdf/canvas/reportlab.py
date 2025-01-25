@@ -7,9 +7,10 @@ from tokenpdf.utils.image import to_image, join_mask_channel
 from contextlib import nullcontext
 from collections import namedtuple
 from tempfile import NamedTemporaryFile
-from .canvas import Canvas, CanvasPage
 from PIL import Image, ImageColor
 from tokenpdf.utils.verbose import vprint, vtqdm
+from tokenpdf.image import TokenImage
+from .canvas import Canvas, CanvasPage
 import contextlib
 import numpy as np
 
@@ -39,15 +40,19 @@ class ReportLabCanvasPage(CanvasPage):
         for command in tqdm(self.commands, desc="Executing Page Commands", leave=False):
             cmd_type = command[0]
             if cmd_type == "image":
-                _, x, y, width, height, image_path, mask, flip, angle = command
+                _, x, y, width, height, image, flip, angle = command
                 rotate = -angle # Reportlab rotates clockwise
                 
-                with apply_image_filters(image_path, mask, flip, **self.pil_save_kw) as img_path:
-                    self.canvas.add_cleanup(img_path.name)
+                with apply_image_filters(image, flip) as fimage:
                     bltagaim = reportlab_translation_for_rotation(self.height, height, (x, y), rotate)
                     # Now we can rotate around this point
                     with self._translation(*bltagaim), self._rotation(rotate):
-                        self.pdf_canvas.drawImage(img_path.name, 0, 0, 
+                        image_param = fimage.image
+                        if image_param.mode == "RGBA":
+                            # Reportlab supports alpha channels, but they don't seem
+                            # to work unless passed as a file path
+                            image_param = fimage.path
+                        self.pdf_canvas.drawImage(fimage.path, 0, 0, 
                                                     width * mm, height * mm, mask='auto')
             elif cmd_type == "text":
                 _, x, y, text, font, size, rotate = command
@@ -77,7 +82,7 @@ class ReportLabCanvasPage(CanvasPage):
                                         stroke=thickness, fill=fill)
                 
 
-    def _image(self, x: float, y: float, width: float, height: float, image_path: str, mask: Any = None,
+    def _image(self, x: float, y: float, width: float, height: float, image:TokenImage, 
               flip: Tuple[bool, bool] = (False, False), rotate: float = 0):
         """
 
@@ -96,7 +101,7 @@ class ReportLabCanvasPage(CanvasPage):
         Returns:
 
         """
-        self.commands.append(("image", x, y, width, height, image_path, mask, flip, rotate))
+        self.commands.append(("image", x, y, width, height, image, flip, rotate))
 
     def text(self, x: float, y: float, text: str, font: str = "Helvetica", size: int = 12, rotate: float = 0):
         """
@@ -324,47 +329,34 @@ class ReportLabCanvas(Canvas):
 
 
 
-def apply_image_filters(image_path, mask=None, flip: Tuple[bool, bool] = (False, False), 
-                        rotate: float = 0, **kw) -> NamedTemporaryFile:
+def apply_image_filters(image:TokenImage, flip: Tuple[bool, bool] = (False, False), 
+                        rotate: float = 0) -> TokenImage:
     """Apply filters to an image.
 
     Args:
-      mask: The mask to apply to the image. (Default value = None)
       flip: A tuple of booleans indicating whether to flip the image
     horizontally and vertically.
       rotate: The angle to rotate the image.
-      image_path: The path to the image file or a PIL Image object.
-      **kw: Additional keyword arguments to pass to the PIL save method.
 
     Returns:
-      : A context to hold the file on disk
+      : The image with the filters applied.
 
     """
     
-    if mask is None and flip == (False, False) and rotate == 0:
+    if not image.masked and flip == (False, False) and rotate == 0:
         # null context with a name attribute for the image path
-        return nullcontext(namedtuple("context", ["name"])(image_path))
-    image = to_image(image_path)
-    if mask is not None:
-        # The mask parameter only masks specific colours
-        # we'll use the alpha channel instead
-        image = join_mask_channel(image, mask, blend=True, allow_resize=True)
+        return image
+
+    # The mask parameter in reportlab only masks specific colours
+    # we'll use the alpha channel instead
+    image = image.join_mask(blend=True, allow_resize=True)
     
 
-    if flip[0]:
-        image = image.transpose(Image.FLIP_LEFT_RIGHT)
-    if flip[1]:
-        image = image.transpose(Image.FLIP_TOP_BOTTOM)
+    image = image.flip(flip)
     if rotate:
         image = image.rotate(rotate * 180 / np.pi, expand=True)
     
-    context = NamedTemporaryFile(suffix=".png", delete=False)
-    
-    path = Path(context.name)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    #context.close()  # Close the file so that the image can be saved to it
-    image.save(path, **kw)
-    return context
+    return image
 
 
 def reportlab_translation_for_rotation(page_height, object_height, top_left, angle):
