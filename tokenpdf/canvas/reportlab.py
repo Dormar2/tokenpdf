@@ -16,7 +16,7 @@ import numpy as np
 class ReportLabCanvasPage(CanvasPage):
     """ """
     def __init__(self, canvas, width: float, height: float, background: str = None):
-        super().__init__(canvas)
+        super().__init__(canvas, (width, height))
         self.pdf_canvas = canvas.pdf
         self.width = width
         self.height = height
@@ -39,12 +39,16 @@ class ReportLabCanvasPage(CanvasPage):
         for command in tqdm(self.commands, desc="Executing Page Commands", leave=False):
             cmd_type = command[0]
             if cmd_type == "image":
-                _, x, y, width, height, image_path, mask, flip, rotate = command
+                _, x, y, width, height, image_path, mask, flip, angle = command
+                rotate = -angle # Reportlab rotates clockwise
                 
-                with apply_image_filters(image_path, mask, flip, rotate, **self.pil_save_kw) as img_path:
+                with apply_image_filters(image_path, mask, flip, **self.pil_save_kw) as img_path:
                     self.canvas.add_cleanup(img_path.name)
-                    self.pdf_canvas.drawImage(img_path.name, x * mm, (self.height - y - height) * mm, 
-                                            width * mm, height * mm, mask='auto')
+                    bltagaim = reportlab_translation_for_rotation(self.height, height, (x, y), rotate)
+                    # Now we can rotate around this point
+                    with self._translation(*bltagaim), self._rotation(rotate):
+                        self.pdf_canvas.drawImage(img_path.name, 0, 0, 
+                                                    width * mm, height * mm, mask='auto')
             elif cmd_type == "text":
                 _, x, y, text, font, size, rotate = command
                 self.pdf_canvas.setFont(font, size)
@@ -60,10 +64,17 @@ class ReportLabCanvasPage(CanvasPage):
                     self.pdf_canvas.line(x1 * mm, (self.height - y1) * mm, x2 * mm, (self.height - y2) * mm)
                 
             elif cmd_type == "rect":
-                _, x, y, width, height, stroke, fill, color, style = command
-                with self._stroke_color(color), self._stroke_style(style):
-                    self.pdf_canvas.rect(x * mm, (self.height - y - height) * mm, width * mm, height * mm, 
-                                        stroke=stroke, fill=fill)
+                _, x, y, width, height, thickness, fill, color, style, angle = command
+                # Rect command needs the bottom left corner
+                blx, bly = rotation_matrix(angle) @ np.array([0, height]) + np.array([x, y])
+                #angle =  angle - np.pi/2
+                angle *= -1 # Reportlab rotates clockwise
+                bltagaim = blx,self.height-bly
+                #bltagaim = reportlab_translation_for_rotation(self.height, height, (blx, #bly), angle)
+                with self._stroke_color(color), self._stroke_style(style), \
+                        self._translation(*bltagaim), self._rotation(angle):
+                    self.pdf_canvas.rect(0,0, width * mm, height * mm, 
+                                        stroke=thickness, fill=fill)
                 
 
     def _image(self, x: float, y: float, width: float, height: float, image_path: str, mask: Any = None,
@@ -140,8 +151,8 @@ class ReportLabCanvasPage(CanvasPage):
         """
         self.commands.append(("line", x1, y1, x2, y2, color, thickness, style))
     
-    def rect(self, x: float, y: float, width: float, height: float, stroke: int = 1, fill: int = 0,
-            color: Tuple[int, int, int] = (0, 0, 0), style: str = "solid"):
+    def rect(self, x: float, y: float, width: float, height: float, thickness: int = 1, fill: int = 0,
+            color: Tuple[int, int, int] = (0, 0, 0), style: str = "solid", angle: float = 0):
         """
 
         Args:
@@ -161,7 +172,7 @@ class ReportLabCanvasPage(CanvasPage):
         Returns:
 
         """
-        self.commands.append(("rect", x, y, width, height, stroke, fill, color, style))
+        self.commands.append(("rect", x, y, width, height, thickness, fill, color, style, angle))
 
     @contextlib.contextmanager
     def _stroke_color(self, color: Tuple[int, int, int] | str | None) -> contextlib.contextmanager:
@@ -250,17 +261,28 @@ class ReportLabCanvasPage(CanvasPage):
         if angle == 0:
             yield args
             return
-        self.pdf_canvas.rotate(angle)
-        # args is a sequence of x,y pairs, we need to find out where they went
-        # after the rotation
-        new_args = []
-        for x, y in args:
-            x, y = x * np.cos(angle) - y * np.sin(angle), x * np.sin(angle) + y * np.cos(angle)
-            new_args.append((x, y))
-        yield new_args
-        self.pdf_canvas.rotate(-angle)
+        self.pdf_canvas.saveState()
+        # Reportlab rotates around the origin, which is at the bottom left
+        self.pdf_canvas.rotate(angle*180/np.pi)
+        yield args
+        self.pdf_canvas.restoreState()
+            
 
+    @contextlib.contextmanager
+    def _translation(self, x: float, y: float) -> contextlib.contextmanager:
+        """Translate the canvas for the context.
 
+        Args:
+          x: float: 
+          y: float: 
+
+        Returns:
+
+        """
+        self.pdf_canvas.saveState()
+        self.pdf_canvas.translate(x * mm, y * mm)
+        yield
+        self.pdf_canvas.restoreState()
 class ReportLabCanvas(Canvas):
     """ """
     def __init__(self, config: Dict[str, Any], file_path: str | None = None):
@@ -345,3 +367,23 @@ def apply_image_filters(image_path, mask=None, flip: Tuple[bool, bool] = (False,
     return context
 
 
+def reportlab_translation_for_rotation(page_height, object_height, top_left, angle):
+    """ This function calculates the translation needed before a reportlab-rotation 
+        (which rotates around the bottom left) 
+        that would have the same results as rotating around the top left,
+        while respecting the reportlab coordinate system. """
+    # Reportlab rotates around the origin, which is at the bottom left
+    # So we need to find the bottom left corner of where we want to paint.
+    # If we rotate, we need to find the bottom left corner of the rotated image
+    # So rotate (0,h) by the angle around (0,0) and then translate by (x,y)
+    x,y = top_left
+    bl = np.array([0, object_height])
+    M = rotation_matrix(angle)
+    bltag = bl @ M + np.array([x, y])
+    # Now invert y due to reportlab's coordinate system
+    bltagaim = np.array([bltag[0], page_height - bltag[1]])
+    return bltagaim
+
+def rotation_matrix(angle):
+    """ """
+    return np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])

@@ -80,7 +80,7 @@ class StandingToken(Token):
         """
         return np.array([config["width"], config["height"]])
     
-    def draw(self, canvas, config, resources, rect):
+    def draw(self, view, config, resources):
         """
 
         Args:
@@ -92,8 +92,8 @@ class StandingToken(Token):
         Returns:
 
         """
-        super().draw(canvas, config, resources, rect)
-        x, y, width, height = rect
+        super().draw(view, config, resources)
+        x, y, width, height = 0,0,*view.size
         xy = np.array([x, y])
         
 
@@ -103,10 +103,6 @@ class StandingToken(Token):
         b = max(bw, bh)
         smargin = config.get("standing_margin", 0) * np.array([b,b])
         rotated = False
-        if (aw < ah) != (width < height):
-            rotated = True
-            sw, sh = sh, sw
-            bw, bh = bh, bw
         sw_small, sh_small = sw - 2*smargin[0], sh - 2*smargin[1]
         
         if not rotated:
@@ -123,23 +119,23 @@ class StandingToken(Token):
             fold3 = (x + smargin[0], y + bh + 2*sh, x+sw - smargin[0], y + bh + 2*sh)
         else:
             # Horizontal fold
-            # Left, rotated anticlockwise
+            # Left, rotated clockwise
             pic1 = (*(xy + smargin + [bw, 0]), sw_small, sh_small)
-            pic1_transformation = {"flip": (True, False), "rotate": np.pi/2}
-            # Right, rotated clockwise
+            pic1_transformation = {"flip": (False, False), "rotate": -np.pi/2}
+            # Right, rotated anticlockwise
             pic2 = (*(xy + [bw + sw, 0] + smargin), sw_small, sh_small)
-            pic2_transformation = {"flip": (False, False), "rotate": -np.pi/2}
+            pic2_transformation = {"flip": (True, False), "rotate": np.pi/2}
 
             # Fold lines
             fold1 = (x + bw, y + smargin[1], x + bw, y + sh - smargin[1])
             fold2 = (x + bw + sw, y + smargin[1], x + bw + sw, y + sh - smargin[1])
             fold3 = (x + bw + 2*sw, y + smargin[1], x + bw + 2*sw, y + sh - smargin[1])
-        canvas.image(*pic1, resources[config["image_url"]], **pic1_transformation)
-        canvas.image(*pic2, resources[config["image_url"]], **pic2_transformation)
+        view.image(*pic1, resources[config["image_url"]], **pic1_transformation)
+        view.image(*pic2, resources[config["image_url"]], **pic2_transformation)
 
-        canvas.line(*fold1)
-        canvas.line(*fold2)
-        canvas.line(*fold3)
+        view.line(*fold1)
+        view.line(*fold2)
+        view.line(*fold3)
 
 
         

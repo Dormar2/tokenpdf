@@ -60,20 +60,20 @@ class Token(ABC):
         """
         pass
 
-    def draw(self, canvas, config, resources, rect):
-        """Draws the token on the specified rectangle area.
+    def draw(self, view, config, resources):
+        """Draws the token on the specified canvas view
 
         Args:
-          canvas: The drawing surface (PDF canvas, for example).
-          rect: The rectangle (x, y, width, height) defining the area.
-          config: 
-          resources: 
+          view: The canvas view to draw the token on. The view provides sizing as well.
+          config: The configuration dictionary for the token instance.
+          resources: Resources loaded for the token instance (e.g. fonts, images).
 
         Returns:
 
         """
         if config.get("rect_border_thickness") is not None:
-            canvas.rect(*rect, stroke=config.get("rect_border_thickness", None),
+            rect=(0,0,*view.size)
+            view.rect(*rect, thickness=config.get("rect_border_thickness", None),
                         fill=0, color=config.get("rect_border_color", None),
                         style=config.get("rect_border_style", None))
                         

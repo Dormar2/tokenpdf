@@ -1,15 +1,8 @@
-from multiprocessing import context
-from httpx import delete
+
 import numpy as np
 from papersize import parse_papersize
 from tokenpdf.canvas import make_canvas
 from tokenpdf.utils.verbose import vprint, vtqdm
-from PIL.Image import Image
-import PIL
-from typing import Tuple, Generator
-from contextlib import contextmanager
-from pathlib import Path
-from tempfile import NamedTemporaryFile
 
 class CanvasManager:
     """Manages canvas creation and token and map placement."""
@@ -21,7 +14,7 @@ class CanvasManager:
         self.loader = loader
         self.canvas = make_canvas(config)
         self.config = config
-        self.page_size, self.margin, self.page_size_margin = self._calculate_page_size()
+        self.page_size, self.margin, self.page_size_margin, self.margin_r = self._calculate_page_size()
 
     def place_tokens(self, tokens, layout, maps, mapper):
         """Places tokens on the canvas.
@@ -43,8 +36,8 @@ class CanvasManager:
         print = vprint(verbose)
         sizes = [token.area(token_cfg, self.loader) for token, token_cfg in tqdm(tokens)]
         sizesm = [self._add_margin(size, token_cfg) for size, (_, token_cfg) in zip(sizes, tokens)]
-        sizes_with_margins = [size for size, _ in sizesm]
-        token_margins = [margin for _, margin in sizesm]
+        sizes_with_margins = [size for size, *_ in sizesm]
+        token_margins = [(r, regular) for _, r, regular in sizesm]
 
         print("Arranging tokens in pages")
         print(f"Page size: {self.page_size_margin}")
@@ -53,16 +46,24 @@ class CanvasManager:
         canvas_pages = self._make_pages(pages)
         for placement_page, canvas_page in zip(tqdm(pages, desc="Drawing token pages"),
                                                 canvas_pages):
+            page_view = canvas_page.margin_view(self.margin_r, regular=True)
             for tindex, x, y, width, height in tqdm(placement_page, desc="Drawing tokens", leave=False):
+                
+                
                 orig_size = sizes[tindex]
-                tmargins = token_margins[tindex]
-                if (width < height) != (orig_size[0] < orig_size[1]):
-                    orig_size = orig_size[::-1]
-                    tmargins = tmargins[::-1]
-
-                xm, ym = np.array([x, y]) + self.margin + tmargins
+                r, regular_margins = token_margins[tindex]
+                rotated = not same_aspect_ratio((width, height), orig_size)
+                
+                if rotated:
+                    # When rotated, the top left corner is shifted to the right by "height"
+                    # And the whole thing is rotated around that by 90 degrees
+                    view = page_view.view(x + height, y, height, width, angle=np.pi/2)
+                else:
+                    view = page_view.view(x,y, width, height)
+                    
+                mview = view.margin_view(r, regular=regular_margins)
                 token, t_cfg = tokens[tindex]
-                token.draw(canvas_page, t_cfg, self.loader, (xm, ym, *orig_size))
+                token.draw(mview, t_cfg, self.loader)
     
     def make_map_tokens(self, maps, mapper):
         """Places maps on the canvas.
@@ -112,10 +113,10 @@ class CanvasManager:
         page_size = np.array([float(m) for m in parse_papersize(page_type, "mm")])
         if config.get("orientation", "portrait").lower() in ["landscape", "l"]:
             page_size = page_size[::-1]
-        margin_ratio = config.get("page_margin", config.get("margin", 0))
+        margin_ratio = np.clip(config.get("page_margin", config.get("margin", 0)), 0, 1)
         margin = page_size * margin_ratio
         page_size_margin = page_size - 2 * margin
-        return page_size, margin, page_size_margin
+        return page_size, margin, page_size_margin, margin_ratio
 
 
     def _gen_page_size(self):
@@ -152,6 +153,14 @@ class CanvasManager:
         Returns:
 
         """
-        margin = token_cfg.get("margin", 0) * np.array(size)
-        return size + 2 * margin, margin
+        regular = token_cfg.get("regular_margin", True)
+        r = np.clip(token_cfg.get("margin", 0), 0, 1)
+        margin =  r * (np.array(size) if not regular else np.min(size))
+        return size + 2 * margin, r, regular
   
+
+def same_aspect_ratio(size1, size2):
+    """ Tests if the two (w,h) pairs have the same aspect ratio."""
+    if size1[1] == 0 or size2[1] == 0:
+        return size2[1] == 0 and size1[1] == 0
+    return np.isclose(size1[0] / size1[1], size2[0] / size2[1], rtol=1e-2, atol=1e-2)

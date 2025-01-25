@@ -34,6 +34,7 @@ These are deterimined with the following keys:
 
 #### Generated Configurations
 If the `layout` is `rectpack`, the layout algorithms are generated as described above (cross-product of the values).
+
 If the `layout` is `rectpack_best`, the following configuration combinations are used:
 - `bin_algo`: Default (`BNF`)
 - `pack_algo`: `"GuillotineBssfSas", "MaxRectsBssf", "SkylineMwf"`

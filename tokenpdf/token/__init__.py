@@ -1,7 +1,7 @@
 from .token import Token, TokenRegistry
 from .circle import CircleToken
 from .standing import StandingToken
-
+from .stand import SideStandToken
 Registry = Token.TOKEN_REGISTRY
 
 def make_token(config, resources):

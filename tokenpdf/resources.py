@@ -3,7 +3,6 @@ from pathlib import Path
 from turtle import width
 from typing import Dict, Any, List, Sequence
 import tempfile
-from matplotlib.pylab import f
 import requests
 import mimetypes
 import numpy as np
@@ -19,7 +18,7 @@ class ResourceLoader:
     CROSS_PRODUCT_KEYS = ["page_size"]
     def __init__(self):
         self._local_files = []
-        self._cfg = None
+        self._cfg = {}
         self._resources = {}
         self._systems = system_registry
 

@@ -9,6 +9,8 @@ networkx
 tqdm
 rectpack
 pikepdf
+tabulate
+PyMuPDF
 sphinx
 sphinx-rtd-theme
 myst-parser

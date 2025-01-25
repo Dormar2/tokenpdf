@@ -20,10 +20,11 @@ def main():
     os.system(f"{sys.executable} -m build")
     whl = newest_file_in_dir(Path("dist"), ".whl")
     print(f"Built package: {whl}")
-    print("Uploading package to PyPi...")
-    os.system(f'twine upload "{whl}"')
-    print("Uploaded package to PyPi")
-    #print("Uploading docs to readthedocs...")
+    if "-u" in sys.argv:
+        print("Uploading package to PyPi...")
+        os.system(f'twine upload "{whl}"')
+        print("Uploaded package to PyPi")
+    
 
 
 

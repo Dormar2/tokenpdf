@@ -1,10 +1,9 @@
-from email.mime import base
+
 from pathlib import Path
 from uuid import uuid4
 
 import pikepdf
 import fitz
-from pyparsing import replaceWith
 
 from tokenpdf.utils.general import rename
 from tokenpdf.utils.verbose import vprint, vtqdm

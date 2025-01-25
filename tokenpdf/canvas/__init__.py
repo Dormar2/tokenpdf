@@ -1,4 +1,4 @@
-from .canvas import Canvas, CanvasPage
+from .canvas import Canvas, CanvasPage, CanvasPageView
 from pathlib import Path
 def make_canvas(config):
     """Factory function to create a canvas based on the configuration.
@@ -24,4 +24,4 @@ def make_canvas(config):
     raise ValueError(f"Unsupported canvas type: {config['canvas']}")
         
 
-__all__ = ["make_canvas", "Canvas", "CanvasPage"]
+__all__ = ["make_canvas", "Canvas", "CanvasPage", "CanvasPageView"]
