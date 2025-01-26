@@ -6,7 +6,7 @@ class SimpleMapper(Mapper):
     """Simple mapper, assumes page sizes are all the same"""
     def __init__(self, config):
         super().__init__(config)
-
+        self.balance = config.get("balance_fragments", False)
 
     def map(self, img: Map,
             page_sizes: Generator[Tuple[float, float], None, None],
@@ -32,7 +32,6 @@ class SimpleMapper(Mapper):
         page_size = np.array(next(page_sizes))
         pw,ph = page_size
         
-        text_orientation = "p" if pw < ph else "l"
         text_margin = img.config.get("text_margin", 0)
         border_margin = img.config.get("border_margin", 0)
         pborder = np.min(page_size) * border_margin * 2
@@ -46,6 +45,8 @@ class SimpleMapper(Mapper):
         roi_size = np.clip(roi_size, 0, img_size)
         placement_N = np.ceil(img_size / roi_size).astype(int)
         nw, nh = placement_N
+        if self.balance:
+            roi_size = img_size / placement_N
         placements = []
         page_num = 0
         for i in range(nw):
