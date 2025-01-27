@@ -38,7 +38,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "tokenpdf=tokenpdf.__init__:main",  # Command-line entry point
+            "tokenpdf=tokenpdf.__main__:main",  # Command-line entry point
         ],
     },
     include_package_data=True,  # Include non-code files listed in MANIFEST.in

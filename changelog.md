@@ -16,10 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 - Configuration documentation expanded upon.
+- CLI slightly changed: Added -e flag and disallowed empty configuration list without it.
+- Moved `__init__.py`'s main function to `__main__.py` to allow for `python -m tokenpdf` execution.
 
 ### Fixed
 - Relative links in README.md as they are rendered in the readthedocs documentation.
-
 
 ## [0.2.2] - 2025-01-16
 ### Fixed

@@ -38,7 +38,8 @@ The library provides both a command-line interface and a Python API. The CLI is 
 python -m tokenpdf <config_files> [-o OUTPUT] [-v] [-s]
 ```
 
-- `config_files`: One or more configuration files in TOML, JSON, YAML, or INI format. If omitted, `example.toml` is used. See examples below, or [Configuration Reference](CONFIGURATION_REFERENCE.md) for more details.
+- `config_files`: One or more configuration files in TOML, JSON, YAML, or INI format. See examples below, or [Configuration Reference](CONFIGURATION_REFERENCE.md) for more details. Can only be omitted if `-e` flag is used.
+- `-e`: Use the example configuration file (`tokenpdf/data/example.toml`).
 - `-o OUTPUT`: The output PDF file (default: `output.pdf`). If ommited, the output name is derived from the first configuration file.
 - `-v`: Enable verbose output.
 - `-s`: Silence most output.
