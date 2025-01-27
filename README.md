@@ -35,7 +35,7 @@ pip install -r requirements.txt
 The library provides both a command-line interface and a Python API. The CLI is the easiest way to get started.
 
 ```bash
-python -m tokenpdf \<config_files\> \[-o OUTPUT\] [-v] [-s]
+python -m tokenpdf <config_files> [-o OUTPUT] [-v] [-s]
 ```
 
 - `config_files`: One or more configuration files in TOML, JSON, YAML, or INI format. If omitted, `example.toml` is used. See examples below, or [Configuration Reference](CONFIGURATION_REFERENCE.md) for more details.
