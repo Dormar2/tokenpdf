@@ -53,7 +53,7 @@ The value is a list of token definitions. Each token definition can have the fol
 - `rect_border_thickness`: The thickness of the rectangle border in mm. (Default: 0 for circle tokens, 1 for standing tokens)
 - `rect_border_color`: The color of the rectangle border. Can be a string (e.g., `"black"`) or a list of 3 integers (e.g., [0, 0, 0]) for RGB values. (Default: `"black"`)
 - `rect_border_style`: The style of the rectangle border. Can be any combination of "solid", "dot", and "dash" separated by "-" (e.g., "solid-dot-dash"). See reportlab documentation for reference. (Default: `"dot-dash"`)
-- Other token-type specific properties. See [Standing Token](#standing-token) and [Circle Token](#circle-token) below for more information.
+- Other token-type specific properties. See [Standing Token](#Standing Token) and [Circle Token](#Circle Token) below for more information.
 
 ### Token Creation
 For each token definition, `count` tokens are created as follows:
@@ -153,6 +153,73 @@ tokens = [
       "image_url": "./Shinebright.png",
       "tokens": [
         { "type": "standing", "size": "medium", "count": 1}
+      ]
+    }
+  }
+}
+```
+
+
+#### Top-Connection Standing Token
+The "Top-Connection Standing Token" is a token type called `stand_tops` that includes a `sides` integer setting (default: 4).  
+A `stand_tops` token is an `n`-sided polygon where the token image is placed along each edge, with the top of the image aligned to the edge, where `n` is the `sides` setting.
+The `standing` token is a specific case of the top-connection standing token, defined as a `stand_tops` token with the `sides` value set to 2.
+
+Example:
+```toml
+[monsters.ape]
+name = "Ape"
+size = "Medium"
+type = "Beast"
+images_url = ["./ape1.webp", "./ape2.webp", "./ape3.jpg"]
+tokens = [
+    { type = "stand_tops", size = "medium", count = 5, sides = 4}
+]
+```
+
+```json
+{
+  "monsters": {
+    "ape": {
+      "name": "Ape",
+      "size": "Medium",
+      "type": "Beast",
+      "images_url": ["./ape1.webp", "./ape2.webp", "./ape3.jpg"],
+      "tokens": [
+        { "type": "stand_tops", "size": "medium", "count": 5, "sides": 4}
+      ]
+    }
+  }
+}
+```
+
+
+#### Side-Connection Standing Token
+The "Side-Connection Standing Token" is a token type called `stand_sides` that includes a `sides` integer setting (default: 4).
+The token images are placed alongside each other in a horizontal row. The `sides` setting determines the number of images placed side-by-side.
+
+Example:
+```toml
+[monsters.ape]
+name = "Ape"
+size = "Medium"
+type = "Beast"
+images_url = ["./ape1.webp", "./ape2.webp", "./ape3.jpg"]
+tokens = [
+    { type = "stand_sides", size = "medium", count = 5, sides = 4}
+]
+```
+
+```json
+{
+  "monsters": {
+    "ape": {
+      "name": "Ape",
+      "size": "Medium",
+      "type": "Beast",
+      "images_url": ["./ape1.webp", "./ape2.webp", "./ape3.jpg"],
+      "tokens": [
+        { "type": "stand_sides", "size": "medium", "count": 5, "sides": 4}
       ]
     }
   }

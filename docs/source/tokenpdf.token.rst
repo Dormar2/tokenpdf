@@ -12,10 +12,10 @@ tokenpdf.token.circle module
    :undoc-members:
    :show-inheritance:
 
-tokenpdf.token.standing module
+tokenpdf.token.stand module
 ------------------------------
 
-.. automodule:: tokenpdf.token.standing
+.. automodule:: tokenpdf.token.stand
    :members:
    :undoc-members:
    :show-inheritance:

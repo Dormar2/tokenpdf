@@ -35,6 +35,7 @@ The following properties are supported for each map:
 - `border_margin`: The margin around the map in page ratio, i.e. a number between 0 and 1 that is multiplied by the page's smallest dimension. (Default: 0)
 - `text_margin`: The margin below the map for text, in page ratio (see `border_margin`). If present, the map's name and the fragmentation coordinates (in terms of page-sized grid cells) are printed below the map. For example, "Town Street: 0,3" (Default: 0)
 - `image_url`: The URL or path to the map's image. If a URL, the image will be downloaded. This value is **required**.
+- `balance_fragments`: If true, the map's fragments are balanced in size across the pages, instead of filling out the earlier pages first. This avoids having the last with page with small fragments (usually, strips) of maps in file, but may lead to a slightly less efficient use of space. (Default: false)
 - `add_grid`: The map's system grid is added to the map as a visual aid (see below for grid sizing). (Default: false)
 
 #### Sizing

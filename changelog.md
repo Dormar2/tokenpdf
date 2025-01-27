@@ -8,8 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.3] - Unreleased
 ### Added
 - Redesign of the canvas system, allowing rotated and translated views
-- New token type "stand_sides" and "stand_tops" to replace the older "standing". Will fully replace in future commits
-- Rotated rects
+- Redo of Image handling, including caching and lazy-loading, with a overall more consistent and efficient approach.
+- New token type "stand_sides" and "stand_tops" to replace the older "standing".
+- Rotated rects.
+- balance_fragments (default: False) value to map configuration, leading to a more balanced sizing of map fragments.
+
+
+### Changed
+- Configuration documentation expanded upon.
+
+### Fixed
+- Relative links in README.md as they are rendered in the readthedocs documentation.
+
 
 ## [0.2.2] - 2025-01-16
 ### Fixed

@@ -10,3 +10,4 @@ Configuration
     config_docs/monsters.md
     config_docs/maps.md
     config_docs/layout.md
+    config_docs/systems.md

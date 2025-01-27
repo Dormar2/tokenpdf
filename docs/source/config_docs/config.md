@@ -37,10 +37,10 @@ The root node of the configuration file supports the following keys:
 - `margin`: The page margin in mm (Default: 0).
 
 ### Layout
-For more information, see [Layout Algorithms](Layout.md).
+For more information, see [Layout Algorithms](layout.md).
 - `layout`: The layout algorithm (or algorithm combination) to use. Options are:
  - `rectpack_best`: A default combination of rectpack algorithms that produces the best results. (Default)
- - `rectpack`: Any of the rectpack algorithms. See [Layout Algorithms](Layout.md).
+ - `rectpack`: Any of the rectpack algorithms. See [Layout Algorithms](layout.md).
  - `greedy`: A greedy algorithm that places tokens in the order they are defined in the configuration file.
  - `all`: Best result from applying all available layout algorithms.
 - `rotation`: Allow rotation of tokens to fit better in the layout. (Default: false)
