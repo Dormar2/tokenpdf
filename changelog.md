@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+### Added
+- SVG canvas (multiple files) using svgwrite
+- HTML output by embedding the SVGs in an HTML file
+- PDF output by converting HTML to PDF using PySide6
+
+### Changed
+- Default PDF output to use SVG(svgwrite)->HTML->PDF(PySide6) pipeline instead of reportlab. (Much faster)
+
 ## [0.3] - 2025-01-27
 ### Added
 - Redesign of the canvas system, allowing rotated and translated views

@@ -1,3 +1,4 @@
+from typing import Sequence
 import numpy as np
 
 def n_sided_polygon(n, side_length, center=None):
@@ -29,3 +30,22 @@ def n_sided_polygon(n, side_length, center=None):
         points_center = (np.max(x)/2, np.max(y)/2)
         points += center - points_center
     return points
+
+
+def stroke_dash_array(style:str) -> Sequence[int]:
+    pattern = []
+    for s in style.split("-"):
+        if s.lower() == "dot":
+            pattern.extend([1, 2])
+        elif s.lower() == "dash":
+            pattern.extend([3, 2])
+        elif s.lower() == "solid":
+            pattern.extend([1, 0])
+        elif s.isnumeric():
+            pattern.append(int(s))
+        else:
+            try:
+                pattern.append(int(s))
+            except ValueError:
+                raise ValueError(f"Invalid line style: {style}")
+    return pattern

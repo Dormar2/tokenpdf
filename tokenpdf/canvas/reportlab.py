@@ -9,6 +9,7 @@ from collections import namedtuple
 from tempfile import NamedTemporaryFile
 from PIL import Image, ImageColor
 from tokenpdf.utils.verbose import vprint, vtqdm
+from tokenpdf.utils.geometry import stroke_dash_array
 from tokenpdf.image import TokenImage
 from .canvas import Canvas, CanvasPage
 import contextlib
@@ -216,19 +217,7 @@ class ReportLabCanvasPage(CanvasPage):
             return
         #orig_style = self.pdf_canvas._lineDash
         orig_style = self.lastLineDash # Unfortunately, the original line style is not accessible
-        pattern = []
-        for s in style.split("-"):
-            if s.lower() == "dot":
-                pattern.extend([1, 2])
-            elif s.lower() == "dash":
-                pattern.extend([3, 2])
-            elif s.lower() == "solid":
-                pattern.extend([1, 0])
-            else:
-                try:
-                    pattern.append(int(s))
-                except ValueError:
-                    raise ValueError(f"Invalid line style: {style}")
+        pattern = stroke_dash_array(style)
         self.pdf_canvas.setDash(pattern)
         self.lastLineDash = pattern
         yield
@@ -288,6 +277,7 @@ class ReportLabCanvasPage(CanvasPage):
         self.pdf_canvas.translate(x * mm, y * mm)
         yield
         self.pdf_canvas.restoreState()
+
 class ReportLabCanvas(Canvas):
     """ """
     def __init__(self, config: Dict[str, Any], file_path: str | None = None):
@@ -327,6 +317,10 @@ class ReportLabCanvas(Canvas):
             self.pdf.showPage()  # Finalize the page
         self.pdf.save()
 
+    @Canvas.name.getter
+    def name(self):
+        """ """
+        return "pdf(ReportLab)"
 
 
 def apply_image_filters(image:TokenImage, flip: Tuple[bool, bool] = (False, False), 

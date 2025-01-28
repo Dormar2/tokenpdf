@@ -44,3 +44,5 @@ imagesize==1.4.1
 
 platformdirs
 wrapt
+
+svgwrite

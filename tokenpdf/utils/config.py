@@ -4,6 +4,7 @@ import json
 import toml
 import yaml
 import configparser
+from contextlib import contextmanager
 
 def merge_configs(base: Dict[str, Any], override: Dict[str, Any], *overrides) -> Dict[str, Any]:
     """Merges two or more configuration dictionaries.
@@ -131,3 +132,15 @@ def get_data_folder() -> Path:
     return Path(__file__).parent.parent / "data"
 
     
+
+@contextmanager
+def config_change(cfg, **kw):
+    orig_values = {k:cfg.get(k) for k in kw.keys() if k in cfg}
+    
+    cfg.update(kw)
+    yield
+    for k in kw:
+        if k in orig_values:
+            cfg[k] = orig_values[k]
+        else:
+            del cfg[k]

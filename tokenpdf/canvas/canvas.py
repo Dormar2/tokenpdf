@@ -20,6 +20,11 @@ class CanvasPage:
         self.optimize_images_for_dpmm = canvas.config.get(
                                     "optimize_images_for_dpmm", 
                                     canvas.config.get("optimize_images_for_dpi", 0) / 25.4)
+        if canvas.config.get("preview", False):
+            if not self.optimize_images_for_dpmm:
+                self.optimize_images_for_dpmm = 10
+            else:
+                self.optimize_images_for_dpmm /= 10
         
     
     
@@ -59,7 +64,7 @@ class CanvasPage:
         
 
     
-    def _image(self, x: float, y: float, width: float, height: float, image:TokenImage, mask: Any = None,
+    def _image(self, x: float, y: float, width: float, height: float, image:TokenImage,
                flip: Tuple[bool, bool] = (False, False), rotate: float = 0):
         """Draws an image on the page.
 
@@ -420,11 +425,13 @@ class Canvas:
         pass
 
     
-    def save(self, verbose: bool = False):
+    def save(self, verbose: bool = False, return_result: bool = False):
         """Finalizes and saves the canvas to the output file.
 
         Args:
           verbose: bool:  (Default value = False)
+          return_result: bool:  If True, return the result instead of saving to a file. 
+                                only supported on some canvases (Default value = False)
 
         Returns:
 
@@ -451,3 +458,32 @@ class Canvas:
                     file_path.unlink()
             except Exception as e:
                 logging.warning(f"Failed to cleanup file {file_path}: {e}")
+
+    @property
+    def name(self):
+        """ """
+        return self.__class__.__name__
+
+class ConvertCanvasWrapper(Canvas):
+    def __init__(self, subcanvas, config, file_path = None):
+        super().__init__(config, file_path)
+        self.subcanvas = subcanvas
+        self.format = config['output_format']
+
+
+    def create_page(self, size, background = None) -> CanvasPage:
+        return self.subcanvas.create_page(size, background)
+    
+    def save(self, verbose = False, return_result = False):
+        result = self.subcanvas.save(verbose, return_result = True)
+        return self.convert(result, verbose, return_result = return_result)
+    
+    def convert(self, result, verbose, return_result = False):
+        raise NotImplementedError("Convert method must be implemented in subclass")
+    
+    def name(self):
+        return f"{self.subcanvas.name}2{self.converted_name}"
+    
+    @property
+    def converted_name(self):
+        return self.format.upper()

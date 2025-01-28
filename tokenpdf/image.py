@@ -10,6 +10,7 @@ import numpy as np
 import PIL
 import PIL.Image
 import logging
+import base64
 from platformdirs import user_cache_dir
 from wrapt import synchronized
 from tokenpdf.utils.io import download_file
@@ -433,6 +434,20 @@ class TokenImage:
     @property
     def mask_array(self) -> np.ndarray:
         return self._mask.as_array() if self._mask else None
+    
+
+    @property
+    def bytes(self) -> bytes:
+        return self.path.read_bytes()
+    
+    @property
+    def mask_bytes(self) -> bytes:
+        return self.mask_path.read_bytes() if self._mask else None
+    
+    @property
+    def mime_with_data(self) -> str:
+        suffix = self.path.suffix[1:]
+        return f"data:image/{suffix};base64,{base64.b64encode(self.bytes).decode()}"
     
     def resize(self, size: Tuple[int, int] = None, scale_x: float = None, scale_y : float = None) -> "TokenImage":
         if size is None:

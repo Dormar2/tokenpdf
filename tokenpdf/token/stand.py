@@ -140,7 +140,7 @@ class TopStandToken(Token):
         factor = np.array(view.size) / orig_size
         # Reconstruct the inner and outer polygons from the new size
         nw, nh = factor * np.array([config["width"], config["height"]])
-        print(f"Old size: {orig_size}, New size: {nw,nh}, while view size is {view.size}, with angle {view.angle} and factor {factor}")
+        
         inner, outer = self.construct_segments(nw, nh, n)
         # Align all points to the origin of the view (0,0)
         all_points = np.concatenate([inner, outer], axis=0)

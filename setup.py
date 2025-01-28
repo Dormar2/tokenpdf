@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="tokenpdf",  
-    version="0.2.2",  
+    version="0.4",  
     description="Generate printable PDF files for tabletop RPG tokens and maps",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",  
@@ -34,7 +34,8 @@ setup(
         "imagesize",
         "pikepdf",
         "tabulate",
-        "PyMuPDF"
+        "PyMuPDF",
+        "svgwrite"
     ],
     entry_points={
         "console_scripts": [
