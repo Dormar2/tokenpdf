@@ -5,6 +5,8 @@
 # sphinx outputs
 docs/build/
 
+# bins download folder
+bin/
 
 # For now
 .vscode/ 
