@@ -91,14 +91,15 @@ class CircleToken(Token):
         keep_aspect_ratio = config.get("keep_aspect_ratio", True)
         
         if config.get("image_url") is not None:
-            image = resources[config["image_url"]]
+            #image = resources[config["image_url"]]
+            image = self.get_image(resources, config["image_url"], config=config)
             oim_width, oim_height = image.dims
             im_width, im_height = new_dims(radius, (oim_width, oim_height), keep_aspect_ratio)
             mask = self._get_mask(config, (oim_width, oim_height))
             image = image.add_mask(mask)
             view.image(width / 2 - im_width / 2, height / 2 - im_height / 2, im_width, im_height, image)
         if config.get("border_url") is not None:
-            border_image = resources[config["border_url"]]
+            border_image = self.get_image(resources, config["border_url"], config=config)
             oim_width, oim_height = border_image.dims
             im_width, im_height = new_dims(radius, (oim_width, oim_height), keep_aspect_ratio)
             mask = self._get_mask(config, (oim_width, oim_height))

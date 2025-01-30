@@ -77,7 +77,11 @@ class Token(ABC):
                         style=config.get("rect_border_style", None))
                         
 
-
+    def get_image(self, resources, key, config=None):
+        if config is None:
+            config = self.config
+        return resources[key].filters(config.get("filters", {}), resources)
+    
     # Registry new subclasses
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)

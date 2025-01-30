@@ -14,7 +14,9 @@ import base64
 from platformdirs import user_cache_dir
 from wrapt import synchronized
 from tokenpdf.utils.io import download_file
-from tokenpdf.utils.image import join_mask_channel
+from tokenpdf.utils.image import join_mask_channel, find_background, mask_to_roi
+from tokenpdf.filters import apply_imagefilters
+
 
 logger = logging.getLogger(__name__)
 PossibleSource = str | Path | PIL.Image.Image | np.ndarray
@@ -387,6 +389,8 @@ class TokenImage:
         self._save_kw = kw
         self._img = to_floating_image(image, default_suffix, **kw)
         self._mask = to_floating_image(mask, default_suffix, **kw)
+        self._gray = None
+        self._foreground = None
         
 
     def crop(self, roi: Tuple[int, int, int, int]) -> "TokenImage":
@@ -405,7 +409,10 @@ class TokenImage:
             self._mask.cleanup()
     
     def add_mask(self, mask: FloatingImage|PossibleSource) -> TokenImage:
-        return TokenImage(self._img, mask, self._default_suffix, **self._save_kw)
+        image = self
+        if image.masked:
+            image = image.join_mask()
+        return TokenImage(image._img, mask, image._default_suffix, **image._save_kw)
 
     @property
     def image(self) -> PIL.Image.Image:
@@ -449,6 +456,35 @@ class TokenImage:
         suffix = self.path.suffix[1:]
         return f"data:image/{suffix};base64,{base64.b64encode(self.bytes).decode()}"
     
+    @property
+    def gray(self) -> FloatingImage | FloatingImageWithROI:
+        if self._gray is None:
+            pil_image = self.image.convert("L")
+            self._gray = FloatingImage(pil_image, default_suffix=self._default_suffix, **self._save_kw)
+        return self._gray
+    
+    @property
+    def foreground(self) -> FloatingImage | FloatingImageWithROI:
+        if self._foreground is None:
+            arr = find_background(self.gray.as_array())
+            self._foreground = FloatingImage(np.logical_not(arr), default_suffix=self._default_suffix, **self._save_kw)
+        return self._foreground
+    
+    @property
+    def foreground_roi(self) -> Tuple[int, int, int, int]:
+        return mask_to_roi(self.foreground.as_array())
+    
+    def crop_foreground_roi(self) -> "TokenImage":
+        return self.crop(self.foreground_roi)
+
+    def filters(self, filters: Sequence[str]|Dict[str, Dict], loader) -> "TokenImage":
+        image = self
+        if not filters:
+            return image
+        image = apply_imagefilters(image, filters, loader)
+        return image
+        
+
     def resize(self, size: Tuple[int, int] = None, scale_x: float = None, scale_y : float = None) -> "TokenImage":
         if size is None:
             if scale_y is None:
@@ -491,3 +527,4 @@ class TokenImage:
     
     def __exit__(self, *args):
         self.cleanup()
+

@@ -163,7 +163,7 @@ class TopStandToken(Token):
             angle = np.arctan2(tly, tlx)
             rview = view.view(*top_left_corner, nw, nh, angle=angle)
             mview = rview.margin_view(config.get("standing_margin", 0), regular=True)
-            img = self._load_image(resources, config["image_url"])
+            img = self._load_image(config, resources, config["image_url"])
             
             mview.image(0,0, None, None, img)
             # Draw the bounding rect of each image
@@ -188,8 +188,8 @@ class TopStandToken(Token):
 
 
 
-    def _load_image(self, resources, url):
-        return resources[url]
+    def _load_image(self, config, resources, url):
+        return self.get_image(resources, url, config=config)
 
 
 

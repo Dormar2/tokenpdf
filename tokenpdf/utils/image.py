@@ -4,7 +4,7 @@ from PIL import Image
 from pathlib import Path
 from typing import Tuple
 import numpy as np
-
+import cv2
 
 def get_file_dimensions(file_path: str | Image.Image) -> Tuple[int, int]:
     """Get the dimensions of an image file.
@@ -223,3 +223,51 @@ def add_grid(img : Image.Image, grid: Tuple[int,int], color: str = "black",
             img.paste(color, (x0, y0, x1, y0+line_thickness))
             img.paste(color, (x0, y0, x0+line_thickness, y1))
     return img
+
+
+def find_background(image:np.ndarray, bins:int=64, background_colors:int=3) -> np.ndarray:
+    # Convert to grayscale
+    if image.ndim == 3:
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    else:
+        gray = image
+    hist = image_hist(gray, bins)
+    # Find candidates for the background color
+    # by selecting the N most common colors
+    N = background_colors
+    color_range = np.linspace(0, 255, bins+1).astype(np.uint8)
+    background_colors = np.argsort(hist, axis=0)[-N:]
+    
+
+    # Now extract only boundary pixels:
+    boundary = np.zeros(gray.shape, dtype=bool)
+    boundary[[0, -1], :] = True
+    boundary[:, [0, -1]] = True
+    bpixels = gray[boundary].flatten()
+    bhist = image_hist(bpixels, bins)
+    
+    result_mask = np.zeros(gray.shape, dtype=bool)
+    # Only use common colors that are also high-ish in the boundary
+    for b in background_colors:
+        
+        boundary_cover = bhist[b] / bpixels.size 
+        if boundary_cover > 1/2:
+            g = gray.flatten()
+
+            mask = cv2.inRange(g, color_range[b], color_range[b+1]).astype(bool)
+            result_mask |= mask.reshape(gray.shape)
+    return result_mask
+    
+
+def find_foreground_roi(image:np.ndarray, hist_bins:int=64, background_colors:int=3) -> Tuple[int, int, int, int]:
+    mask = find_background(image, hist_bins, background_colors)
+    mask = np.logical_not(mask)
+    return mask_to_roi(mask)
+
+def mask_to_roi(mask:np.ndarray) -> Tuple[int, int, int, int]:
+    rect = cv2.boundingRect(mask.astype(np.uint8))
+    return tuple(rect)
+
+def image_hist(image: np.ndarray, bins: int = 64) -> np.ndarray:
+    hist = cv2.calcHist([image], [0], None, [bins], [0, 256])
+    return hist

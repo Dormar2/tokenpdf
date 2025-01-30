@@ -30,6 +30,7 @@ size = "Medium"
 type = "Humanoid"
 image_url = "https://picsum.photos/200/500"
 thumbnail_url = "https://picsum.photos/75"
+filters = ["zoom", "foreground"]
 tokens = [
     #{ type = "standing", size = "medium", count = 3},
     #{ type = "stand_sides", size = "medium", count = 4},
