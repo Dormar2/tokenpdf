@@ -9,11 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 - SVG canvas (multiple files) using svgwrite
 - HTML output by embedding the SVGs in an HTML file
-- PDF output by converting HTML to PDF using PySide6 (Qt) or using playwright
-- PDF output by converting SVG to PDF using svglib (WIP)
+- PDF output by converting HTML to PDF using PySide6 (Qt) or playwright
+- PDF output by converting SVG to PDF using rsvg-convert, resvg, or svglib (much faster than directly to reportlab)
+
 
 ### Changed
-- Default PDF output to use SVG(svgwrite)->HTML->PDF(PySide6) pipeline instead of reportlab. (Much faster)
+- Default PDF output to use SVG(svgwrite)->PDF(resvg) pipeline instead of reportlab. (Much faster)
+- Redone registry class, reusing it in Tokens and Canvases
+
+### Fixed
+- Fixed foreground filter, still needs improvement
 
 ## [0.3] - 2025-01-27
 ### Added

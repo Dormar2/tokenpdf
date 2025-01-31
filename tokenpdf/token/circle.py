@@ -8,14 +8,14 @@ from tokenpdf.utils.image import get_file_dimensions, dpmm, circle_mask
 
 INCH_IN_MM = 25.4 #TODO more accurate value
 
-class CircleToken(Token):
+class CircleToken(Token, name="circle"):
     """Represents circular tokens."""
 
     @classmethod
     def supported_types(cls):
         """ """
         return {
-            "Circle": {
+            "circle": {
                 "radius": None, "border_color": "black", "fill_color": "white",
                 "image_url": None, "border_url": None, "keep_aspect_ratio": True,
                 "mask": "circle"

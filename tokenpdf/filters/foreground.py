@@ -5,11 +5,11 @@ from .image_filter import ImageFilter
 
 class ZoomToROI(ImageFilter, name="zoom"):
     def filter(self, image):
-        return image.crop_foreground_roi()
+        return image.crop_foreground_roi(zoom=True)
 
 class ForegroundFilter(ImageFilter, name="foreground"):
     def filter(self, image):
         mask = image.foreground.as_array()
-        return image.add_mask(mask)
+        return image.add_mask(mask).join_mask()
     
 

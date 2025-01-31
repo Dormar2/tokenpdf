@@ -28,16 +28,20 @@ class SvgwriteCanvasPage(CanvasPage):
     def _image(self, x, y, width, height, image, flip = (False, False), rotate = 0):
         if image.masked:
             image = image.join_mask()
-        mdata = image.mime_with_data
+        # We're using specifically a png encoding here
+        # because some svg renders have problems with jpegs
+        mdata = image.mime_with_data_png
         md5 = hashlib.md5(mdata.encode()).hexdigest()
         data = self._find_image(md5)
         if data is None:
             id_ = uuid4().hex[:8]
+            dims = np.array(image.dims)
             img = self.dwg.image(mdata, size=image.dims)
-            symbol = self.dwg.symbol(id=id_)
+
+            symbol = self.dwg.symbol(id=id_)#, viewBox=array_arg((dims[0]/2).astype(int),0, *dims))
             symbol.add(img)
             self.dwg.add(symbol)
-            self.images[md5] = {"id": id_, "dims": image.dims}
+            self.images[md5] = {"id": id_, "dims": dims}
             data = self.images[md5]
                                        
         

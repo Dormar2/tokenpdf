@@ -226,9 +226,19 @@ def add_grid(img : Image.Image, grid: Tuple[int,int], color: str = "black",
 
 
 def find_background(image:np.ndarray, bins:int=64, background_colors:int=3) -> np.ndarray:
+    image = np.asarray(image)
+    initial_mask = None
     # Convert to grayscale
     if image.ndim == 3:
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        if image.shape[2] == 3:
+            gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        elif image.shape[2] == 4:        
+            gray = cv2.cvtColor(image, cv2.COLOR_RGBA2GRAY)
+            initial_mask = image[:, :, 3] <= 1
+        elif image.shape[2] == 1:
+            gray = image
+        else:
+            raise ValueError("Unsupported number of channels in image")
     else:
         gray = image
     hist = image_hist(gray, bins)
@@ -256,6 +266,8 @@ def find_background(image:np.ndarray, bins:int=64, background_colors:int=3) -> n
 
             mask = cv2.inRange(g, color_range[b], color_range[b+1]).astype(bool)
             result_mask |= mask.reshape(gray.shape)
+    if initial_mask is not None:
+        result_mask |= initial_mask
     return result_mask
     
 
@@ -271,3 +283,59 @@ def mask_to_roi(mask:np.ndarray) -> Tuple[int, int, int, int]:
 def image_hist(image: np.ndarray, bins: int = 64) -> np.ndarray:
     hist = cv2.calcHist([image], [0], None, [bins], [0, 256])
     return hist
+
+def force_roi_aspect_ratio(roi:Tuple[int,int,int,int], dims:
+                           Tuple[int,int]) -> Tuple[int,int,int,int]:
+
+    
+    def ao(roi):
+        if isinstance(roi, float):
+            return roi
+        if len(roi) == 2:
+            return roi[0] / roi[1]
+        return ao(roi[2:])
+    goal_ao = ao(dims)
+
+    def to_bounds(roi_):
+        rx,ry,rw,rh = roi_
+        rx, ry = max(0, rx), max(0, ry)
+        return rx, ry, min(dims[0], rx + rw) - rx, min(dims[1], ry + rh) - ry
+    def fix_x(roi_):
+        rx,ry,rw,rh = roi_
+        extra = np.round(rh * goal_ao - rw).astype(int)
+        return to_bounds((rx - extra // 2, ry, rw + extra, rh))
+    def fix_y(roi_):
+        rx,ry,rw,rh = roi_
+        extra = np.round(rw / goal_ao - rh).astype(int)
+        return to_bounds((rx, ry - extra // 2, rw, rh + extra))
+    
+    def compare_ao(roi1, roi2):
+        ao1 = ao(roi1)
+        ao2 = ao(roi2)
+        if np.isclose(ao1, ao2, atol=1e-2):
+            return 0
+        return -1 if ao1 < ao2 else 1 
+
+    #print("Goal AO:", goal_ao)
+    #print("Initial AO:", ao(roi), roi)
+    if compare_ao(goal_ao, roi) > 0:
+        # Need to be wider
+        roi = fix_x(roi)
+    #print("Fixed X AO:", ao(roi), roi)
+    if compare_ao(goal_ao, roi) < 0:
+        # Need to be taller
+        roi = fix_y(roi)
+    #print("Fixed Y AO:", ao(roi), roi)
+
+    # The previous adjustments may have not been enough, so we try reducing instead
+
+    if compare_ao(goal_ao, roi) > 0:
+        # Cannot make it wider, make it less tall
+        roi = fix_y(roi)
+    #print("Fixed Y AO:", ao(roi), roi)  
+    if compare_ao(goal_ao, roi) < 0:
+        # Cannot make it taller, make it less wide
+        roi = fix_x(roi)
+    #print("Fixed X AO:", ao(roi), roi)
+    return roi
+    

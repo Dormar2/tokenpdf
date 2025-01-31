@@ -1,8 +1,8 @@
-from .token import Token, TokenRegistry
+from .token import Token
 from .circle import CircleToken
-#from .standing import StandingToken
+
 from .stand import SideStandToken, TopStandToken
-Registry = Token.TOKEN_REGISTRY
+
 
 def make_token(config, resources):
     """
@@ -14,6 +14,6 @@ def make_token(config, resources):
     Returns:
 
     """
-    return Registry.make(config, resources)
+    return Token.make(config, resources)
 
-__all__ = ["Token", "TokenRegistry", "CircleToken", "Registry", "make_token", "SideStandToken", "TopStandToken"]
+__all__ = ["Token", "CircleToken", "Registry", "make_token", "SideStandToken", "TopStandToken"]

@@ -129,7 +129,8 @@ class KnownPagesLayout(Layout):
         while len(pages) <= len(token_sizes): # Safety check
             try:
                 if verbose:
-                    print(f"Trying {len(pages)} pages")
+                    #print(f"Trying {len(pages)} pages")
+                    pass
                 result = self.arrange_on_pages(token_sizes, pages, verbose)
                 # Remove unneeded pages
                 while not result[-1]:
@@ -282,12 +283,12 @@ class BestLayout(Layout):
         result1area = _largest_contiguous_areas(result1)
         result2area = _largest_contiguous_areas(result2)
         if result1area > result2area:
-            print(f"{layout1} has the same page count ({len(result1)}) but more contiguous area ({result1area}) than {layout2} ({result2area}), using it")
+            #print(f"{layout1} has the same page count ({len(result1)}) but more contiguous area ({result1area}) than {layout2} ({result2area}), using it")
             return result1, layout1
         elif result1area < result2area:
-            print(f"{layout2} has the same page count ({len(result2)}) but more contiguous area ({result2area}) than {layout1} ({result1area}), using it")
+            #print(f"{layout2} has the same page count ({len(result2)}) but more contiguous area ({result2area}) than {layout1} ({result1area}), using it")
             return result2, layout2
-        print(f"{layout1},{layout2}: Equivalent ({len(result1)}), ({result1area}), using {layout1}")
+        #print(f"{layout1},{layout2}: Equivalent ({len(result1)}), ({result1area}), using {layout1}")
         return result1, layout1
 
     

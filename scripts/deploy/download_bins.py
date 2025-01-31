@@ -27,6 +27,12 @@ REPOS = [
     'https://github.com/miyako/console-rsvg-convert'
 ]
 
+# Some repositories have different conventions
+REPO_FILENAME_OVERRIDES ={
+    'console-rsvg-convert': {'windows': ['x86_64.zip']}
+}
+
+BIN_ROOT = Path('tokenpdf/bin')
 
 def releases(repo):
     """List of releases for a given repository."""
@@ -38,12 +44,12 @@ def releases(repo):
 
 def download_path(platform, repo, asset):
     """Download path for a given asset."""
-    return Path('bin') / repo[1] / platform / asset['name']
+    return BIN_ROOT / repo[1] / platform / asset['name']
 
 
 def download_release(release, platform, repo):
     """Assets from a release that match the specified platform."""
-    assets = find_release_platform_assets(release, platform)
+    assets = find_release_platform_assets(release, platform, repo)
     for asset in assets:
         logger.info(f"Downloading {asset['name']} for {platform}")
         download_url = asset['browser_download_url']
@@ -51,10 +57,15 @@ def download_release(release, platform, repo):
         yield download_file(download_url, path, allow_rename=False)
 
 
-def find_release_platform_assets(release, platform):
+def find_release_platform_assets(release, platform, repo):
     """Assets from a release that match the specified platform."""
     for asset in release['assets']:
-        identifiers = PLATFORMS[platform]
+        _, repo_name = repo
+        if  repo_name in REPO_FILENAME_OVERRIDES and platform in REPO_FILENAME_OVERRIDES[repo_name]:
+            identifiers = REPO_FILENAME_OVERRIDES[repo_name][platform]
+        else:
+            identifiers = PLATFORMS[platform]
+        print(f'Checking {asset["name"]} for {identifiers}')
         if any(identifier in asset['name'] for identifier in identifiers):
             yield asset
 

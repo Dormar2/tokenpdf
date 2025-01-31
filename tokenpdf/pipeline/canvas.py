@@ -41,7 +41,7 @@ class CanvasManager:
 
         print("Arranging tokens in pages")
         print(f"Page size: {self.page_size_margin}")
-        print(f"Token sizes: {sizes_with_margins}")
+        #print(f"Token sizes: {sizes_with_margins}")
         pages = layout.arrange(sizes_with_margins, self._gen_page_size(), verbose=verbose)
         canvas_pages = self._make_pages(pages)
         for placement_page, canvas_page in zip(tqdm(pages, desc="Drawing token pages"),

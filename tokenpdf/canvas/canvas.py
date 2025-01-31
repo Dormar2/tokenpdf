@@ -3,7 +3,7 @@ from pathlib import Path
 import logging 
 import numpy as np
 from tokenpdf.image import TokenImage
-
+from tokenpdf.utils.registry import RegistryClass
 
 
 class CanvasPage:
@@ -393,6 +393,10 @@ class CanvasPageView(CanvasPage):
             margin = np.array(self.size) * ratio
         return self.translate(*margin).resize(*(self.size - 2*margin))
 
+
+class CanvasRegistry(RegistryClass):
+    pass
+
 class Canvas:
     """Baseclass for a canvas to manage multiple pages."""
 
@@ -463,6 +467,8 @@ class Canvas:
     def name(self):
         """ """
         return self.__class__.__name__
+    
+    factory = CanvasRegistry.register
 
 class ConvertCanvasWrapper(Canvas):
     def __init__(self, subcanvas, config, file_path = None):
@@ -487,3 +493,4 @@ class ConvertCanvasWrapper(Canvas):
     @property
     def converted_name(self):
         return self.format.upper()
+    

@@ -11,7 +11,8 @@ bin/
 # For now
 .vscode/ 
 
-
+# Non-committed scripts
+scripts/experiment/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

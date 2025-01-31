@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Tuple, Generator
+import inspect
 
 class ResettableGenerator:
     """A generator that can be reset to its initial state,
@@ -42,7 +43,19 @@ class ResettableGenerator:
         """ """
         self.available = self.history[::-1].copy()
 
-
+@contextmanager
+def set_attr(obj, **kwargs):
+    was = {key:getattr(obj, key, None) for key in kwargs if hasattr(obj, key)}
+    for key, value in kwargs.items():
+        setattr(obj, key, value)
+    try:
+        yield obj
+    finally:
+        for key, value in kwargs.items():
+            if key in was:
+                setattr(obj, key, was[key])
+            else:
+                delattr(obj, key)
 
 def consume(generator, n):
     """Consume up to n items from a generator and return them in a list.
@@ -82,7 +95,7 @@ class Rename:
 
     Examples:
         .. code-block:: python
-        
+
             with Rename("file.txt", "file.txt.tmp"):
                 process_file("file.txt.tmp")
                 # If process_file fails, the original file is still intact.
@@ -124,3 +137,15 @@ class Rename:
         return False
     
 rename = Rename
+
+
+def parent_class_leading_to(cls, parent_cls):
+    """ Returns the direct parent of the cls that is a subclass of parent_cls."""
+    if not issubclass(cls, parent_cls):
+        raise ValueError(f"{cls} is not a subclass of {parent_cls}")
+    for c in inspect.getmro(cls):
+        if c is cls:
+            continue
+        if issubclass(c, parent_cls):
+            return c
+    raise RuntimeError(f"Parent class {parent_cls} not found in {cls} inheritance chain.")

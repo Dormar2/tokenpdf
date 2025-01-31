@@ -1,5 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
+import PIL.ImageFilter
 import csv
 import tempfile
 from tkinter import Image
@@ -14,7 +15,7 @@ import base64
 from platformdirs import user_cache_dir
 from wrapt import synchronized
 from tokenpdf.utils.io import download_file
-from tokenpdf.utils.image import join_mask_channel, find_background, mask_to_roi
+from tokenpdf.utils.image import join_mask_channel, find_background, mask_to_roi, force_roi_aspect_ratio
 from tokenpdf.filters import apply_imagefilters
 
 
@@ -193,6 +194,9 @@ class FloatingImage:
             return PIL.Image.fromarray(self._sources["array"])
         else:
             self._sources["image"] = (image := PIL.Image.open(self.as_path()))
+            if image.mode not in ("RGB", "RGBA", "L"):
+                self._sources["image"] = (image := image.convert("RGBA"))
+
             return image
             
     
@@ -205,9 +209,7 @@ class FloatingImage:
         elif "temp_path" in self._sources:
             return self._sources["temp_path"]
         elif "image" in self._sources or "array" in self._sources:
-            self._sources["temp_path"] = self._get_temp_path()
-            self._temp_sources.append("temp_path")
-            self.as_pil().save(self._sources["temp_path"], **self._save_kw)
+            self._save("temp_path")
             return self._sources["temp_path"]
         elif "url" in self._sources:
             self._sources["temp_path"] = self._download_to_temporary(self._sources["url"])
@@ -262,11 +264,15 @@ class FloatingImage:
             del self._sources[source]
         self._temp_sources = []
 
-    def crop(self, roi: Tuple[int, int, int, int]) -> "FloatingImageWithROI":
+    def crop(self, roi: Tuple[int, int, int, int], zoom:bool=False) -> "FloatingImageWithROI" | "FloatingImage":
         """
         Return a FloatingImage representing the cropped area
         """
-        return FloatingImageWithROI(self, roi)
+        if not zoom:
+            return FloatingImageWithROI(self, roi)
+        else:
+            roif = force_roi_aspect_ratio(roi, self.dims)
+            return FloatingImageWithROI(self, roif).resize(self.dims)
     
     @property
     def dims(self) -> Tuple[int, int]:
@@ -277,12 +283,14 @@ class FloatingImage:
         else:
             return imagesize.get(self.as_path())
 
-    def _get_temp_path(self, url: str|Path|None = None) -> Path:
+    def _get_temp_path(self, url: str|Path|None = None, suffix = None) -> Path:
+        if suffix is None:
+            suffix = self._default_suffix
         if url and main_image_cache.enabled:
-            return main_image_cache.new(url, self._default_suffix)
+            return main_image_cache.new(url, suffix)
         
         folder = Path(tempfile.gettempdir())
-        path = folder / f"fi_{uuid4().hex[:8]}{self._default_suffix}"
+        path = folder / f"fi_{uuid4().hex[:8]}{suffix}"
         return path
     
     def resize(self, size: Tuple[int, int] = None, scale_x: float = None, scale_y : float = None) -> "FloatingImage":
@@ -294,6 +302,37 @@ class FloatingImage:
             size = np.round(np.array(self.dims()) * np.array([scale_x, scale_y])).astype(int)
 
         return FloatingImage(self.as_pil().resize(size, resample=RESIZE_ALG), default_suffix=self._default_suffix, **self._save_kw) 
+    
+    
+    def _has_path(self) -> bool:
+        return "perm_path" in self._sources or "temp_path" in self._sources
+
+    
+    def as_specific_image_format(self, format:str = ".png") -> Path:
+        if self._has_path() and self.as_path().suffix == format:
+            return self.as_path()
+        
+        #TODO: Make this more efficient by specific source names
+        source_to_create = f"temp_path_{format[1:]}"
+        if source_to_create in self._sources:
+            return self._sources[source_to_create]
+        self._save(source_to_create, format=format)
+        return self._sources[source_to_create]
+    
+    def as_png(self) -> Path:
+        return self.as_specific_image_format(".png")
+        
+    def _save(self, source, url:str = None, format:str = None):
+        if format is None:
+            format = self._default_suffix
+        path = self._get_temp_path(url=url, suffix=format)
+        self._temp_sources.append(source)
+        self.as_pil().save(path, **self._save_kw)
+        self._sources[source] = path
+
+
+
+        
         
 class FloatingImageWithROI:
     def __init__(self, img:FloatingImage, 
@@ -366,6 +405,10 @@ class FloatingImageWithROI:
             self._sources["cropped_path"].unlink()
             del self._sources["cropped_path"]
 
+
+    def as_png(self) -> Path:
+        return self.as_floating_image().as_png()
+
 def to_floating_image(source: PossibleSource | None, default_suffix=None, **save_kw)->FloatingImage|None:
     if isinstance(source, (FloatingImage, FloatingImageWithROI)):
         return source
@@ -393,11 +436,11 @@ class TokenImage:
         self._foreground = None
         
 
-    def crop(self, roi: Tuple[int, int, int, int]) -> "TokenImage":
+    def crop(self, roi: Tuple[int, int, int, int], zoom:bool=False) -> "TokenImage":
         """
         Crop the image and possibly the mask
         """
-        return TokenImage(self._img.crop(roi), self._mask.crop(roi) if self._mask else None, self._default_suffix, **self._save_kw)
+        return TokenImage(self._img.crop(roi,zoom), self._mask.crop(roi,zoom) if self._mask else None, self._default_suffix, **self._save_kw)
 
     @property
     def dims(self) -> Tuple[int, int]:
@@ -448,6 +491,14 @@ class TokenImage:
         return self.path.read_bytes()
     
     @property
+    def png_path(self) -> Path:
+        return self._img.as_png()
+    
+    @property
+    def png_bytes(self) -> bytes:
+        return self.png_path.read_bytes()
+    
+    @property
     def mask_bytes(self) -> bytes:
         return self.mask_path.read_bytes() if self._mask else None
     
@@ -455,6 +506,10 @@ class TokenImage:
     def mime_with_data(self) -> str:
         suffix = self.path.suffix[1:]
         return f"data:image/{suffix};base64,{base64.b64encode(self.bytes).decode()}"
+    
+    @property
+    def mime_with_data_png(self) -> str:
+        return f"data:image/png;base64,{base64.b64encode(self.png_bytes).decode()}"
     
     @property
     def gray(self) -> FloatingImage | FloatingImageWithROI:
@@ -466,16 +521,18 @@ class TokenImage:
     @property
     def foreground(self) -> FloatingImage | FloatingImageWithROI:
         if self._foreground is None:
-            arr = find_background(self.gray.as_array())
-            self._foreground = FloatingImage(np.logical_not(arr), default_suffix=self._default_suffix, **self._save_kw)
+            arr = find_background(self.join_mask().array)
+            foreground = FloatingImage(np.logical_not(arr), default_suffix=self._default_suffix, **self._save_kw)
+            foreground = foreground.as_pil().filter(PIL.ImageFilter.ModeFilter(13))
+            self._foreground = FloatingImage(foreground, default_suffix=self._default_suffix, **self._save_kw)
         return self._foreground
     
     @property
     def foreground_roi(self) -> Tuple[int, int, int, int]:
         return mask_to_roi(self.foreground.as_array())
     
-    def crop_foreground_roi(self) -> "TokenImage":
-        return self.crop(self.foreground_roi)
+    def crop_foreground_roi(self, zoom:bool=False) -> "TokenImage":
+        return self.crop(self.foreground_roi, zoom)
 
     def filters(self, filters: Sequence[str]|Dict[str, Dict], loader) -> "TokenImage":
         image = self

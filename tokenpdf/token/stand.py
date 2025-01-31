@@ -4,7 +4,7 @@ import numpy as np
 from .token import Token
 from tokenpdf.utils.image import get_file_dimensions, complete_size
 from tokenpdf.utils.geometry import n_sided_polygon
-class SideStandToken(Token):
+class SideStandToken(Token, name="stand_sides"):
     """ A new version of the standing token that supports
         more options and uses relative drawing """
     
@@ -79,9 +79,11 @@ class SideStandToken(Token):
         return resources[url]
     
     def _draw_image(self, img, config, resources, view):
-        
+        n = config.get("sides", 4)
         vs = np.array(view.size)
-        standing_size = vs - [0, vs[0]/2]
+        standing_size = vs
+        if n<=2:
+            standing_size -= [0, vs[0]/2]
         m = np.min(vs)*config.get("standing_margin", 0)
         x = y = m
         w,h = standing_size - 2*m
@@ -101,7 +103,7 @@ class SideStandToken(Token):
     
         
         
-class TopStandToken(Token):
+class TopStandToken(Token, name=["stand_tops", "standing"]):
     @classmethod
     def supported_types(cls):
         """ """
