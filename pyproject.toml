@@ -23,10 +23,10 @@ dependencies = {file = ["requirements/core.txt"]}
 [tool.setuptools.dynamic.optional-dependencies]
 gpu = {file = ["requirements/gpu.txt"]}
 cpu = {file = ["requirements/cpu.txt"]}
-svg = {file = ["requirements/svg.txt"]}
 pdf-rl = {file = ["requirements/pdf-rl.txt"]}
 pdf-qt = {file = ["requirements/pdf-qt.txt"]}
 pdf-pr = {file = ["requirements/pdf-pr.txt"]}
+pdf-all = {file = ["requirements/pdf-all.txt"]}
 full = {file = ["requirements/full.txt"]}
 dev = {file = ["requirements/dev.txt"]}
 

@@ -1,3 +1,4 @@
 -r core.in
 llvmlite==0.44.0 # Fixes a specific conflict
+numba==0.61.0 # Fixes a specific conflict
 rembg[cpu,cli]

@@ -15,10 +15,44 @@ See the [Changelog](CHANGELOG.md) for details on recent changes.
 ### Installation
 
 #### From PyPI
+To install, use one of the following commands:
+```bash
+pip install tokenpdf
+pip install tokenpdf[full]
+pip install tokenpdf[full-gpu]
+```
+See below for more details on the installation options.
 
+##### Core
+Contains the core functionality of the library, including token generation and map fragmentation, and rendering to .svg files, and conversion to pdf using rsvg-convert executable.
 ```bash
 pip install tokenpdf
 ```
+##### PDF
+For other PDF backends, add the `pdf-rl`, `pdf-qt`, and/or `pdf-pr` extras:
+- `pdf-rl`: PDF output using reportlab (default)
+  - ```pip install tokenpdf[pdf-rl]```
+- `pdf-qt`: PDF output using PySide6 (Qt)
+  - ```pip install tokenpdf[pdf-qt]```
+- `pdf-pr`: PDF output using playwright
+  - ```pip install tokenpdf[pdf-pr]```
+  - Note: `playwright install` is required to be run before using the playwright backend.
+
+##### Image Filters
+The `rembg` package is used for background removal. To install it, use either the `cpu` or `gpu` extras:
+```bash
+pip install tokenpdf[cpu]
+```
+The `gpu` extra will install `onnxruntime-gpu`. See that package for details about system requirements.
+
+##### Full Installation
+To install all extras, use either the `full` or the `full-gpu` extras:
+```bash
+pip install tokenpdf[full]
+```
+For CPU-based and GPU-based installations, respectively.
+
+
 
 #### From source
 

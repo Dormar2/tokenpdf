@@ -1,7 +1,9 @@
 import os
+import sys
 import logging
 from pathlib import Path
-
+sys.path.append(".")
+from scripts.docs.credits import write_credits
 # Logging configuration
 logging.basicConfig(
     level=logging.INFO,
@@ -11,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 def update_docs():
     """Generate .rst files using Sphinx and build the documentation HTML."""
+    logger.info("Updating credits.md...")
+    write_credits()
+
     logger.info("Generating .rst files from Sphinx...")
     os.system("sphinx-apidoc -o docs/source/ tokenpdf/")
 

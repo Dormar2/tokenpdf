@@ -1,2 +1,2 @@
 -r full_base.in
--r cpu.in
+-r gpu.in

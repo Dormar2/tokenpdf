@@ -5,7 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+
+## [0.4.1]
+### Fixed
+- Some package conflicts between the extras.
+### Added
+- Credits.md file to list all the libraries used in the project and their licenses and URLs. Appended to main documentation file.
+- `pdf-all` extra. This includes all the PDF backends.
+### Changed
+- Updated the readme.md to reflect the new changes in the requirements.
+
+
+
+## [0.4]
 ### Added
 - SVG canvas (multiple files) using svgwrite
 - HTML output by embedding the SVGs in an HTML file
