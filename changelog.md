@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
 
+
+
 ## [0.4.1]
 ### Fixed
 - Some package conflicts between the extras.
@@ -15,7 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Changed
 - Updated the readme.md to reflect the new changes in the requirements.
 
-
+### TODO
+- Use rembg
+- Add screenshots to the documentation
+- Redo canvas creation
 
 ## [0.4]
 ### Added
