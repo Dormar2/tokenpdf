@@ -1,6 +1,5 @@
 import sys
 
-from click import style
 sys.path.append('.')
 from tokenpdf.canvas import make_canvas, Canvas, CanvasPage, CanvasPageView
 from tokenpdf.resources import ResourceLoader

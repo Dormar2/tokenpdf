@@ -2,7 +2,6 @@
 from pathlib import Path
 from uuid import uuid4
 
-from click import File
 import pikepdf
 import PyPDF2
 

@@ -1,6 +1,5 @@
 
 import abc
-from re import M
 from PIL import Image
 from typing import Tuple, Generator, Sequence
 from tokenpdf.layouts import LayoutImpossibleError

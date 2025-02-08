@@ -1,3 +1,34 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools", "wheel", "pip-tools"]
 build-backend = "setuptools.build_meta"
+
+[project]
+dynamic=["optional-dependencies", "dependencies"]
+name = "tokenpdf"
+authors = [{name = "Dor Marciano", email = "doormarci@gmail.com"}]
+readme = {file = "README.md",content-type = "text/markdown"}
+version = "0.4"
+description = "Generate printable PDF files for tabletop RPG tokens and maps"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Games/Entertainment :: Role-Playing"
+]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements/core.txt"]}
+
+[tool.setuptools.dynamic.optional-dependencies]
+gpu = {file = ["requirements/gpu.txt"]}
+cpu = {file = ["requirements/cpu.txt"]}
+svg = {file = ["requirements/svg.txt"]}
+pdf-rl = {file = ["requirements/pdf-rl.txt"]}
+pdf-qt = {file = ["requirements/pdf-qt.txt"]}
+pdf-pr = {file = ["requirements/pdf-pr.txt"]}
+full = {file = ["requirements/full.txt"]}
+dev = {file = ["requirements/dev.txt"]}
+
+[project.scripts]
+tokenpdf = "tokenpdf.__main__:main"

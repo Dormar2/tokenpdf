@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - PDF output by converting HTML to PDF using PySide6 (Qt) or playwright
 - PDF output by converting SVG to PDF using rsvg-convert, resvg, or svglib (much faster than directly to reportlab)
 
+### Changed
+- Revamped requirements into requirements/ folder, with separate files for each extras option.
+- Replaced the papersize library with the papersizes library, which is MIT and not GPL.
+
 
 ### Changed
 - Default PDF output to use SVG(svgwrite)->PDF(resvg) pipeline instead of reportlab. (Much faster)

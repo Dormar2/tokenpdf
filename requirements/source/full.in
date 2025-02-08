@@ -1,0 +1,2 @@
+-r full_base.in
+-r cpu.in

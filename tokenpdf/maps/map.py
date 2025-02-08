@@ -1,4 +1,3 @@
-from pydoc import text
 import numpy as np
 from tokenpdf.image import TokenImage
 from tokenpdf.utils.image import add_grid, complete_size

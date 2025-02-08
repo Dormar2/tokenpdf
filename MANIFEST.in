@@ -1,6 +1,8 @@
 include README.md
 include CHANGELOG.md
 include LICENSE
+include post_install.py
+
 recursive-include tokenpdf *.py
 recursive-include tokenpdf *.json
 recursive-include tokenpdf *.toml

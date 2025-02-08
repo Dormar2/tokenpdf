@@ -1,46 +1,25 @@
-from setuptools import setup, find_packages
+import sys
+from setuptools import setup
+from setuptools.command.install import install
+from pathlib import Path
+
+from importlib import import_module
+def post(distribution):
+    PROJECT_ROOT = Path(__file__).parent
+    sys.path.append(str(PROJECT_ROOT))
+    from post_install import post_install
+    post_install(distribution)
+
+class Installation(install):
+    def run(self):
+        install.run(self)
+        post(self.distribution)
 
 setup(
-    name="tokenpdf",  
-    version="0.4",  
-    description="Generate printable PDF files for tabletop RPG tokens and maps",
-    long_description=open("README.md").read(),
-    long_description_content_type="text/markdown",  
-    url="https://github.com/Dormar2/tokenpdf",  
-    author="Dor Marciano",
-    author_email="doormarci@gmail.com",
-    license="MIT",
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-        "Topic :: Games/Entertainment :: Role-Playing"
-    ],
-    packages=find_packages(),  # Automatically discover packages
-    python_requires=">=3.10",
-    install_requires=[
-        "numpy",
-        "Pillow",
-        "papersize",
-        "reportlab",
-        "toml",
-        "pyyaml",
-        "requests",
-        "networkx",
-        "platformdirs",
-        "tqdm",
-        "wrapt",
-        "rectpack",
-        "imagesize",
-        "pikepdf",
-        "tabulate",
-        "PyMuPDF",
-        "svgwrite"
-    ],
-    entry_points={
-        "console_scripts": [
-            "tokenpdf=tokenpdf.__main__:main",  # Command-line entry point
-        ],
-    },
-    include_package_data=True,  # Include non-code files listed in MANIFEST.in
+    url = "https://github.com/Dormar2/tokenpdf",
+
+    packages = ["tokenpdf"],
+    cmdclass={"install": Installation},
+    include_package_data = True,
+    
 )

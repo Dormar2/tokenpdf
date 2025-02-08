@@ -1,10 +1,6 @@
 import itertools
 from pathlib import Path
-from turtle import width
 from typing import Dict, Any, List, Sequence
-import tempfile
-import requests
-import mimetypes
 import numpy as np
 from tokenpdf.utils.config import merge_configs
 from tokenpdf.utils.image import get_file_dimensions, complete_size

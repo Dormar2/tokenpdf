@@ -1,0 +1,7 @@
+-r full.in
+sphinx
+sphinx-rtd-theme
+myst-parser
+sphinx-autobuild
+ghapi
+uv

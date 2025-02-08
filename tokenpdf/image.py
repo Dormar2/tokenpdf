@@ -1,9 +1,9 @@
 from __future__ import annotations
 from pathlib import Path
 import PIL.ImageFilter
+from PIL import Image
 import csv
 import tempfile
-from tkinter import Image
 from typing import Sequence, Tuple, Dict, Callable
 from uuid import uuid4
 import imagesize

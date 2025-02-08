@@ -1,8 +1,9 @@
 
 import numpy as np
-from papersize import parse_papersize
+
 from tokenpdf.canvas import make_canvas
 from tokenpdf.utils.verbose import vprint, vtqdm
+from tokenpdf.utils.papersize import parse_papersize
 
 class CanvasManager:
     """Manages canvas creation and token and map placement."""

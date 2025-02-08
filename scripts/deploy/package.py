@@ -1,11 +1,11 @@
 import sys
 import logging
 import os
-from pathlib import Path
-from scripts.docs.update import main as update_docs
-
-# Add the current directory to the Python path
+# Windows...
 sys.path.append(".")
+from pathlib import Path
+from scripts.docs.update import update_docs
+from scripts.deploy.requirements import build_requirements
 
 # Logging configuration
 logging.basicConfig(
@@ -29,8 +29,11 @@ def newest_file_in_dir(path: Path, suffix: str | None = None) -> Path:
 
 def main():
     """Build documentation, create a distribution package, and optionally upload to PyPI."""
+    logger.info("Building requirements files...")
+    build_requirements()
+    
     logger.info("Building docs...")
-    update_docs()
+    #update_docs()
 
     logger.info("Building package...")
     os.system(f"{sys.executable} -m build")
@@ -38,9 +41,12 @@ def main():
     whl = newest_file_in_dir(Path("dist"), ".whl")
     logger.info(f"Built package: {whl}")
 
+    targz = newest_file_in_dir(Path("dist"), ".gz")
+    logger.info(f"Built package: {targz}")
+
     if "-u" in sys.argv:
         logger.info("Uploading package to PyPI...")
-        os.system(f'twine upload "{whl}"')
+        os.system(f'twine upload "{whl}" "{targz}"')
         logger.info("Uploaded package to PyPI")
 
 

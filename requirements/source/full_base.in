@@ -1,0 +1,5 @@
+-r core.in
+-r pdf-pr.in
+-r pdf-rl.in
+-r pdf-qt.in
+-r svg.in

@@ -9,14 +9,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
-def main():
+def update_docs():
     """Generate .rst files using Sphinx and build the documentation HTML."""
     logger.info("Generating .rst files from Sphinx...")
     os.system("sphinx-apidoc -o docs/source/ tokenpdf/")
 
     logger.info("Building documentation HTML...")
     os.system("sphinx-build -E -b html docs/source/ docs/build/")
+
+def main():
+    update_docs()
 
 
 if __name__ == "__main__":
