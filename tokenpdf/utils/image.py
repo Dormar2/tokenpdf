@@ -3,8 +3,12 @@ from re import I
 from PIL import Image
 from pathlib import Path
 from typing import Tuple
+from httpx import post
+import logging
 import numpy as np
 import cv2
+from .rembg import can_use_rembg, rembg_remove
+logger = logging.getLogger(__name__)
 
 def get_file_dimensions(file_path: str | Image.Image) -> Tuple[int, int]:
     """Get the dimensions of an image file.
@@ -225,7 +229,19 @@ def add_grid(img : Image.Image, grid: Tuple[int,int], color: str = "black",
     return img
 
 
-def find_background(image:np.ndarray, bins:int=64, background_colors:int=3) -> np.ndarray:
+def find_background_rembg(image:np.ndarray,
+                          provider:str|None=None,
+                          post_process_mask:bool=True,
+                          **kw) -> np.ndarray:
+    return np.logical_not(find_foreground_rembg(image, provider=provider, post_process_mask=post_process_mask, **kw))
+
+def find_foreground_rembg(image:np.ndarray, provider:str|None=None, 
+                          post_process_mask:bool=True, **kw) -> np.ndarray:
+    return np.asarray(rembg_remove(image, provider=provider,
+           post_process_mask=post_process_mask, only_mask=True, **kw)) > 0
+
+
+def find_background_crude(image:np.ndarray, bins:int=64, background_colors:int=3) -> np.ndarray:
     image = np.asarray(image)
     initial_mask = None
     # Convert to grayscale
@@ -269,11 +285,54 @@ def find_background(image:np.ndarray, bins:int=64, background_colors:int=3) -> n
     if initial_mask is not None:
         result_mask |= initial_mask
     return result_mask
+
+def find_foreground_crude(image:np.ndarray, provider:str|None=None, **kw) -> np.ndarray:
+    return np.logical_not(find_background_crude(image, provider=provider, **kw))
+
+def _to_method_and_provider(method:str|None=None):
+    if method is None:
+        method = "rembg" if can_use_rembg() else "crude"
+    elif method == "rembg" and not can_use_rembg():
+        logger.error("rembg requested but not available")
+        raise ValueError("rembg requested but not available")
+    if can_use_rembg():
+        if method == "rembg":
+            return "rembg", None
+        elif method in ["cpu", "gpu", "cuda", "tensorrt"] and can_use_rembg(method):
+            return "rembg", method
+        if method == "cpu":
+            method = "crude"
+            logger.warning("rembg requested with CPU provider, falling back to crude method")
+        else:
+            logger.error(f"Could not create a rembg session with provider {method}")
+            raise ValueError(f"Could not create a rembg session with provider {method}")
+    if method == "crude":
+        return "crude", None
+    else:
+        raise ValueError(f"Unsupported method: {method}")
+
+def find_background(image:np.ndarray, method:str|None = None, bins:int=64, background_colors:int=3, post_process_mask:bool=True,**kw) -> np.ndarray:
+    method, provider = _to_method_and_provider(method)
+    if method == "rembg":
+        return find_background_rembg(image, provider=provider, **kw)
+    elif method == "crude":
+        return find_background_crude(image, bins, background_colors)    
+    raise RuntimeError(f"Logic error: unsupported method {method}")
+
+def find_foreground(image:np.ndarray, method:str|None = None, bins:int=64, background_colors:int=3, post_process_mask:bool=True,**kw) -> np.ndarray:
+    method, provider = _to_method_and_provider(method)
+    if method == "rembg":
+        return find_foreground_rembg(image, provider=provider, **kw)
+    elif method == "crude":
+        return find_foreground_crude(image, bins, background_colors)
+    raise RuntimeError(f"Logic error: unsupported method {method}")
+        
     
 
-def find_foreground_roi(image:np.ndarray, hist_bins:int=64, background_colors:int=3) -> Tuple[int, int, int, int]:
-    mask = find_background(image, hist_bins, background_colors)
-    mask = np.logical_not(mask)
+
+
+def find_foreground_roi(image:np.ndarray, method:str|None = None,  **kw) -> Tuple[int, int, int, int]:
+    mask = find_foreground(image, method=method, **kw)
     return mask_to_roi(mask)
 
 def mask_to_roi(mask:np.ndarray) -> Tuple[int, int, int, int]:

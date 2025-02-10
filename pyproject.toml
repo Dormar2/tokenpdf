@@ -7,7 +7,7 @@ dynamic=["optional-dependencies", "dependencies"]
 name = "tokenpdf"
 authors = [{name = "Dor Marciano", email = "doormarci@gmail.com"}]
 readme = {file = "README.md",content-type = "text/markdown"}
-version = "0.4"
+version = "0.4.1"
 description = "Generate printable PDF files for tabletop RPG tokens and maps"
 requires-python = ">=3.10"
 classifiers = [

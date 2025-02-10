@@ -274,13 +274,16 @@ class ResourceLoader:
 
 
         # Check if the URL is actually a local file
-        if url.lower().startswith("file://"):
-            path_or_url = find_local_path(Path(url[7:]), config_files, verbose)
-        elif (any(url.lower().startswith(s) for s in [".", "/", "~"])
-            or url.lower()[1:3] == ":\\"):
-            path_or_url = find_local_path(Path(url), config_files, verbose)
-        else:
+        if url.lower().startswith("http"):
             path_or_url = url
+        elif url.lower().startswith("file://"):
+            path_or_url = find_local_path(Path(url[7:]), config_files, verbose)
+        else: # elif (any(url.lower().startswith(s) for s in [".", "/", "~"])
+            #or url.lower()[1:3] == ":\\"):
+            # For now, fall back to local paths
+            path_or_url = find_local_path(Path(url), config_files, verbose)
+        
+        
         # Download the resource from the URL
         return TokenImage(path_or_url, None, default_suffix=".png", **pil_save_kw)
     

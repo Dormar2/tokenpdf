@@ -11,16 +11,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.4.1]
 ### Fixed
 - Some package conflicts between the extras.
+- Fixed papersizes adapter not working
 ### Added
 - Credits.md file to list all the libraries used in the project and their licenses and URLs. Appended to main documentation file.
 - `pdf-all` extra. This includes all the PDF backends.
+- Rembg usage in the foreground filter (optional)
+
 ### Changed
 - Updated the readme.md to reflect the new changes in the requirements.
 
 ### TODO
-- Use rembg
 - Add screenshots to the documentation
 - Redo canvas creation
+- Fix relative paths of local images
 
 ## [0.4]
 ### Added

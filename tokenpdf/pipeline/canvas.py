@@ -165,6 +165,9 @@ def same_aspect_ratio(size1, size2):
     """ Tests if the two (w,h) pairs have the same aspect ratio."""
     if size1[1] == 0 or size2[1] == 0:
         return size2[1] == 0 and size1[1] == 0
-    res = np.isclose(size1[0] / size1[1], size2[0] / size2[1], rtol=1e-2, atol=1e-2)
+    def same_ao(s1,s2):
+        return np.isclose(s1[0] / s1[1], s2[0] / s2[1], rtol=1e-2, atol=1e-2)
     
-    return res
+    # Try normally, and floored
+    return (same_ao(size1, size2) or
+            same_ao((int(size1[0]), int(size1[1])), (int(size2[0]), int(size2[1]))))

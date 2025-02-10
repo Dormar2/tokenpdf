@@ -103,7 +103,8 @@ class SvgwriteCanvas(Canvas):
             if return_result:
                 results.append(page.dwg.tostring())
             else:
-                page.dwg.saveas(f"{self.file_path}_{i}.svg", pretty=True)
+                page.dwg.saveas(self.page_filename(i),
+                                pretty=True)
         self.pages = []
         if return_result:
             return results

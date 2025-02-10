@@ -468,6 +468,14 @@ class Canvas:
         """ """
         return self.__class__.__name__
     
+    def page_filename(self,i):
+        path = Path(self.file_path)
+        
+        if '{page}' in path.name or '{page:' in path.name:
+            return path.with_name(path.name.format(page=i))
+        return path.with_name(f"{path.stem}_{i}{path.suffix}")
+
+
     factory = CanvasRegistry.register
 
 class ConvertCanvasWrapper(Canvas):
